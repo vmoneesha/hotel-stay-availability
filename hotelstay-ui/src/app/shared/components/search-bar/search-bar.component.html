@@ -1,41 +1,84 @@
 <form class="search-bar" [formGroup]="form" (ngSubmit)="submit()" aria-label="Hotel search">
-  <div class="field destination-field">
-    <label for="destination">Destination</label>
-    <select id="destination" formControlName="destination" [class.invalid]="isInvalid('destination')">
-      <option value="">Where are you going?</option>
-      @for (destination of destinations; track destination) {
-        <option [value]="destination">{{ destination }}</option>
+  <div class="search-bar-header">
+    <div>
+      <strong>Start your search</strong>
+      <span>Choose where and when you want to stay.</span>
+    </div>
+    <ul aria-label="Search guidance">
+      <li>Today onward</li>
+      <li>1+ night</li>
+      <li>ID checked</li>
+    </ul>
+  </div>
+
+  <div class="search-fields">
+    <div class="field destination-field">
+      <div class="field-heading">
+        <label for="destination">Destination</label>
+        <span>Choose a city</span>
+      </div>
+      <select id="destination" formControlName="destination" [class.invalid]="isInvalid('destination')">
+        <option value="">Where are you going?</option>
+        @for (destination of destinations; track destination) {
+          <option [value]="destination">{{ destination }}</option>
+        }
+      </select>
+      @if (showError('destination')) {
+        <span class="field-error">Destination is required.</span>
+      } @else {
+        <span class="field-hint">Domestic and international cities.</span>
       }
-    </select>
-    @if (showError('destination')) {
-      <span class="field-error">Destination is required.</span>
-    }
-  </div>
+    </div>
 
-  <div class="field">
-    <label for="checkIn">Check-in</label>
-    <input id="checkIn" type="date" formControlName="checkIn" [min]="todayDate" [class.invalid]="isInvalid('checkIn')" (blur)="normalizeDateInput('checkIn')">
-    @if (showError('checkIn')) {
-      <span class="field-error">{{ checkInErrorMessage() }}</span>
-    }
-  </div>
-
-  <div class="field">
-    <label for="checkOut">Check-out</label>
-    <input id="checkOut" type="date" formControlName="checkOut" [min]="minCheckOutDate()" [class.invalid]="isInvalid('checkOut')" (blur)="normalizeDateInput('checkOut')">
-    @if (showError('checkOut')) {
-      <span class="field-error">{{ checkOutErrorMessage() }}</span>
-    }
-  </div>
-
-  <div class="field">
-    <label for="roomType">Room type</label>
-    <select id="roomType" formControlName="roomType">
-      @for (roomType of roomTypes; track roomType) {
-        <option [value]="roomType">{{ roomType || 'Any room type' }}</option>
+    <div class="field">
+      <div class="field-heading">
+        <label for="checkIn">Check-in</label>
+        <span>Arrival date</span>
+      </div>
+      <input id="checkIn" type="date" formControlName="checkIn" [min]="todayDate" [class.invalid]="isInvalid('checkIn')" (blur)="normalizeDateInput('checkIn')">
+      @if (showError('checkIn')) {
+        <span class="field-error">{{ checkInErrorMessage() }}</span>
+      } @else {
+        <span class="field-hint">Defaults to today.</span>
       }
-    </select>
-  </div>
+    </div>
 
-  <button class="primary-button" type="submit" [disabled]="form.invalid">Search</button>
+    <div class="field">
+      <div class="field-heading">
+        <label for="checkOut">Check-out</label>
+        <span>Departure date</span>
+      </div>
+      <input id="checkOut" type="date" formControlName="checkOut" [min]="minCheckOutDate()" [class.invalid]="isInvalid('checkOut')" (blur)="normalizeDateInput('checkOut')">
+      @if (showError('checkOut')) {
+        <span class="field-error">{{ checkOutErrorMessage() }}</span>
+      } @else {
+        <span class="field-hint">Must be after check-in.</span>
+      }
+    </div>
+
+    <div class="field">
+      <div class="field-heading">
+        <label for="roomType">Room type</label>
+        <span>Optional filter</span>
+      </div>
+      <select id="roomType" formControlName="roomType">
+        @for (roomType of roomTypes; track roomType) {
+          <option [value]="roomType">{{ roomType || 'Any room type' }}</option>
+        }
+      </select>
+      <span class="field-hint">Leave as any for all rooms.</span>
+    </div>
+
+    <div class="search-action">
+      <span class="action-spacer" aria-hidden="true"></span>
+      <button class="primary-button" type="submit" [disabled]="form.invalid">
+        <span class="button-copy">
+          <span>Search stays</span>
+          <small>Compare total prices</small>
+        </span>
+        <span class="button-arrow" aria-hidden="true">&rarr;</span>
+      </button>
+      <span class="field-hint">Results update below.</span>
+    </div>
+  </div>
 </form>
