@@ -4,15 +4,11 @@ using HotelStay.Api.Extensions;
 using System.Text.Json.Serialization;
 using HotelStay.Api.Domain.Dtos;
 using HotelStay.Api.Domain.Enums;
-using HotelStay.Api.Domain.ProviderContracts;
 using HotelStay.Api.Domain.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.OpenApi.Models;
 using ApiValidationError = HotelStay.Api.Dtos.ValidationError;
 using ApiValidationProblemResponse = HotelStay.Api.Dtos.ValidationProblemResponse;
-using DomainBudgetNestsProvider = HotelStay.Api.Domain.Providers.BudgetNestsProvider;
-using DomainPremierStaysProvider = HotelStay.Api.Domain.Providers.PremierStaysProvider;
-using DomainReservationService = HotelStay.Api.Domain.Services.ReservationService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,12 +24,6 @@ builder.Services.AddSwaggerGen(options =>
 	});
 	options.OperationFilter<HotelStayExamplesOperationFilter>();
 });
-builder.Services.AddSingleton<IHotelProvider, DomainPremierStaysProvider>();
-builder.Services.AddSingleton<IHotelProvider, DomainBudgetNestsProvider>();
-builder.Services.AddSingleton<HotelSearchService>();
-builder.Services.AddSingleton<DocumentValidationService>();
-builder.Services.AddSingleton<DomainReservationService>();
-builder.Services.AddSingleton<ConcurrentDictionary<string, ReservationResponse>>();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
 	options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -115,7 +105,7 @@ app.MapGet("/hotels/search", async Task<Results<Ok<IReadOnlyCollection<HotelRoom
 app.MapPost("/hotels/reserve", Results<Created<ReservationResponse>, BadRequest<ApiValidationProblemResponse>, UnprocessableEntity<ApiValidationProblemResponse>> (
 	ReservationRequest request,
 	DocumentValidationService documentValidationService,
-	DomainReservationService reservationService,
+	ReservationService reservationService,
 	ConcurrentDictionary<string, ReservationResponse> reservations) =>
 {
 	var validationErrors = ValidateReservationRequest(request);
@@ -216,6 +206,36 @@ static List<ApiValidationError> ValidateReservationRequest(ReservationRequest re
 	if (string.IsNullOrWhiteSpace(request.Destination))
 	{
 		errors.Add(new ApiValidationError("destination", "Destination is required."));
+	}
+
+	if (string.IsNullOrWhiteSpace(request.ProviderCode))
+	{
+		errors.Add(new ApiValidationError("providerCode", "Provider code is required."));
+	}
+
+	if (string.IsNullOrWhiteSpace(request.HotelId))
+	{
+		errors.Add(new ApiValidationError("hotelId", "Hotel id is required."));
+	}
+
+	if (string.IsNullOrWhiteSpace(request.RoomId))
+	{
+		errors.Add(new ApiValidationError("roomId", "Room id is required."));
+	}
+
+	if (string.IsNullOrWhiteSpace(request.GuestName))
+	{
+		errors.Add(new ApiValidationError("guestName", "Guest name is required."));
+	}
+
+	if (string.IsNullOrWhiteSpace(request.DocumentNumber))
+	{
+		errors.Add(new ApiValidationError("documentNumber", "Document number is required."));
+	}
+
+	if (request.PerNightPrice <= 0)
+	{
+		errors.Add(new ApiValidationError("perNightPrice", "Per-night price must be greater than zero."));
 	}
 
 	if (request.CheckIn == DateOnly.MinValue)

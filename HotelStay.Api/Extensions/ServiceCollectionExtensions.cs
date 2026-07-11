@@ -1,8 +1,8 @@
-using HotelStay.Api.Mapping;
-using HotelStay.Api.Providers;
-using HotelStay.Api.Repositories;
-using HotelStay.Api.Services;
-using HotelStay.Api.Validation;
+using System.Collections.Concurrent;
+using HotelStay.Api.Domain.Dtos;
+using HotelStay.Api.Domain.ProviderContracts;
+using HotelStay.Api.Domain.Providers;
+using HotelStay.Api.Domain.Services;
 
 namespace HotelStay.Api.Extensions;
 
@@ -12,14 +12,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<IHotelProvider, PremierStaysProvider>();
         services.AddSingleton<IHotelProvider, BudgetNestsProvider>();
-        services.AddSingleton<IProviderRoomMapper, PremierStaysRoomMapper>();
-        services.AddSingleton<IProviderRoomMapper, BudgetNestsRoomMapper>();
-        services.AddSingleton<IReservationRepository, InMemoryReservationRepository>();
-        services.AddSingleton<IReservationReferenceGenerator, SequentialReservationReferenceGenerator>();
-        services.AddScoped<IHotelSearchValidator, HotelSearchValidator>();
-        services.AddScoped<IReservationValidator, ReservationValidator>();
-        services.AddScoped<IHotelAvailabilityService, HotelAvailabilityService>();
-        services.AddScoped<IReservationService, ReservationService>();
+        services.AddSingleton<HotelSearchService>();
+        services.AddSingleton<DocumentValidationService>();
+        services.AddSingleton<ReservationService>();
+        services.AddSingleton<ConcurrentDictionary<string, ReservationResponse>>();
         return services;
     }
 }

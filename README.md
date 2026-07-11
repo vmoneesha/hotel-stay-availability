@@ -1,28 +1,34 @@
 # Hotel Stay Availability
 
-Hotel Stay Availability is an offline, deterministic hotel booking application built with .NET 8 Minimal API, Angular, xUnit, dependency injection, and clean architecture-style boundaries. The solution searches hotel rooms from two local providers, normalizes their different contracts, validates reservation documents, and stores confirmed reservations in memory.
+Hotel Stay Availability is an offline, deterministic hotel booking application for the SkyRoute case study. It searches local hotel provider stubs, normalizes their different contracts, validates destination-specific identity document rules, and confirms reservations in memory.
 
-No external APIs, database, authentication, or cloud services are required.
+No external APIs, credentials, databases, authentication, cloud services, or nondeterministic data are required.
 
-## Problem Statement
+## Requirements Covered
 
-Hotel availability providers often expose different payload shapes, naming conventions, and levels of detail. The application solves that integration problem by isolating provider-specific contracts behind provider and mapper abstractions, then exposing a stable API and UI model for search and reservation workflows.
-
-The reservation workflow enforces destination-specific identity document rules:
-
-- Domestic destinations: Hyderabad, Bangalore, Mumbai require National ID.
-- International destinations: London, Dubai, Singapore require Passport.
-- Document mismatches return HTTP 422.
+- Search hotel rooms by destination, check-in date, check-out date, and optional room type.
+- Query two deterministic providers: PremierStays and BudgetNests.
+- Normalize provider-specific payloads into one public API contract.
+- Filter unavailable BudgetNests rooms.
+- Display provider badge, room type, per-night price, total stay price, and cancellation policy.
+- Validate stay dates and reservation document rules on the backend.
+- Mirror date and document validation in the Angular frontend.
+- Return HTTP 400 for malformed or missing required input.
+- Return HTTP 422 for document/destination mismatches.
+- Confirm reservations with deterministic references such as `HS-000001`.
+- Retrieve reservations by reference while the API process is running.
 
 ## Technology Stack
 
 - .NET 8 Minimal API
-- Angular standalone components
-- xUnit
-- C# records, enums, dependency injection, extension methods
-- TypeScript strict mode and reactive forms
-- In-memory repository for deterministic reservations
-- Local provider implementations with no network dependencies
+- C# 12 records, enums, dependency injection, and typed Minimal API results
+- Swagger/OpenAPI through Swashbuckle
+- Angular 20 standalone components
+- Angular signals, Reactive Forms, HttpClient, SCSS
+- xUnit backend unit and integration tests
+- Karma/Jasmine Angular unit tests
+- Playwright browser end-to-end test
+- In-memory deterministic provider and reservation data
 
 ## Architecture
 
@@ -30,101 +36,156 @@ The reservation workflow enforces destination-specific identity document rules:
 Angular UI
   -> HotelApiService
     -> .NET Minimal API endpoints
-      -> Validators
-      -> Service layer
+      -> Request validation
+      -> HotelSearchService
         -> IHotelProvider implementations
-        -> IProviderRoomMapper implementations
-        -> IReservationRepository
+        -> Provider-specific payload normalization
+      -> DocumentValidationService
+      -> ReservationService
+      -> In-memory reservation dictionary
 ```
 
 Primary backend boundaries:
 
-- Endpoints: HTTP routing and status-code selection.
-- DTOs: API-facing search, room, reservation, validation, and enum contracts.
-- Providers: offline provider-specific availability contracts.
-- Mappers: provider contract normalization into `HotelRoomDto`.
-- Services: orchestration for search and reservations.
-- Repositories: in-memory persistence abstraction.
-- Validation: date and document-rule enforcement.
+- `Program.cs`: Minimal API routing, HTTP status-code selection, Swagger metadata, and thin request validation.
+- `Domain/Dtos`: public search, room, reservation, and normalized response contracts.
+- `Domain/Enums`: stable JSON enum values for room type, document type, and cancellation policy.
+- `Domain/ProviderContracts`: provider abstraction and provider result wrapper.
+- `Domain/Providers`: deterministic PremierStays and BudgetNests provider stubs.
+- `Domain/ProviderModels`: provider-specific source payload models isolated from API clients.
+- `Domain/Services`: search orchestration, document validation, and reservation confirmation.
+- `Dtos/ValidationProblemResponse.cs`: shared field-level validation response contract.
+- `Documentation`: Swagger/OpenAPI examples.
 
-Adding a third provider should require a new `IHotelProvider`, a matching `IProviderRoomMapper`, and dependency injection registration. The availability service does not contain provider-specific branching.
+Adding a third provider should be additive: introduce a provider-specific source contract, implement `IHotelProvider`, add normalization logic for that provider, register it in dependency injection, and add tests.
 
-## API Endpoints
+## API
+
+The API runs at `http://localhost:5000` with the `http` launch profile.
+
+Swagger UI is available in development at:
+
+```text
+http://localhost:5000/swagger
+```
 
 ### `GET /hotels/search`
 
 Query parameters:
 
-- `destination`
-- `checkIn`
-- `checkOut`
-- `roomType` optional: `Standard`, `Deluxe`, `Suite`
+- `destination` required: `Hyderabad`, `Bangalore`, `Mumbai`, `London`, `Dubai`, or `Singapore`
+- `checkIn` required ISO date, for example `2026-08-10`
+- `checkOut` required ISO date, must be after check-in
+- `roomType` optional: `Standard`, `Deluxe`, or `Suite`
 
-Returns HTTP 400 for missing destination, missing check-in, missing check-out, or check-out less than or equal to check-in.
+Successful responses return a JSON array of normalized rooms.
+
+```json
+[
+  {
+    "providerCode": "PremierStays",
+    "providerBadge": "Premier",
+    "hotelId": "PS-LON-010",
+    "hotelName": "Premier London Regent",
+    "destination": "London",
+    "roomId": "PS-LON-STE",
+    "roomType": "Suite",
+    "perNightPrice": 310,
+    "totalStayPrice": 930,
+    "nights": 3,
+    "amenities": ["Lounge", "Concierge", "Breakfast"],
+    "starRating": 5,
+    "cancellationPolicy": "Refundable",
+    "cancellationPolicyDescription": "Refundable until 96 hours before check-in"
+  }
+]
+```
+
+HTTP 400 is returned for missing destination, missing dates, invalid date formats, or checkout on/before check-in.
 
 ### `POST /hotels/reserve`
 
-Accepts reservation details for a selected room and returns a deterministic reservation reference such as `HS-000001`.
+Request body:
 
-Returns:
+```json
+{
+  "destination": "London",
+  "checkIn": "2026-08-10",
+  "checkOut": "2026-08-13",
+  "providerCode": "PremierStays",
+  "hotelId": "PS-LON-010",
+  "roomId": "PS-LON-STE",
+  "roomType": "Suite",
+  "guestName": "Asha Rao",
+  "documentType": "Passport",
+  "documentNumber": "P1234567",
+  "perNightPrice": 310
+}
+```
 
-- HTTP 400 for missing required reservation/date fields.
-- HTTP 422 when the supplied document type does not match the destination rule.
+Successful responses use HTTP 201 and include a `Location` header for `/hotels/reservation/{reference}`.
+
+```json
+{
+  "reference": "HS-000001",
+  "destination": "London",
+  "checkIn": "2026-08-10",
+  "checkOut": "2026-08-13",
+  "providerCode": "PremierStays",
+  "hotelId": "PS-LON-010",
+  "roomId": "PS-LON-STE",
+  "roomType": "Suite",
+  "guestName": "Asha Rao",
+  "documentType": "Passport",
+  "perNightPrice": 310,
+  "totalStayPrice": 930,
+  "nights": 3,
+  "createdAtUtc": "2026-07-11T00:00:00+00:00"
+}
+```
+
+HTTP 400 is returned for missing destination, missing room/provider fields, missing guest name, missing document number, invalid dates, checkout on/before check-in, or non-positive per-night price.
+
+HTTP 422 is returned when the document type is not valid for the destination.
 
 ### `GET /hotels/reservation/{reference}`
 
-Returns a confirmed in-memory reservation by reference, or HTTP 404 when not found.
+Returns a confirmed reservation from in-memory storage, or HTTP 404 when the reference is not found.
 
-## Provider Behavior
+## Document Rules
 
-PremierStays uses a rich PascalCase contract with amenities, star rating, cancellation policy, and nightly rates.
+- Domestic destinations: `Hyderabad`, `Bangalore`, `Mumbai`
+- International destinations: `London`, `Dubai`, `Singapore`
+- International reservations require `Passport`.
+- Domestic reservations accept `NationalId` or `Passport`.
+- Document mismatches return HTTP 422 with field-level validation details.
 
-BudgetNests uses a minimal snake_case contract with nightly rates and an `available` flag. Unavailable BudgetNests rooms are filtered during mapping.
-
-Both providers normalize into `HotelRoomDto`, including per-night price and calculated total stay price.
-
-## Repository Structure
-
-```text
-hotel-stay-availability/
-  HotelStay.sln
-  HotelStay.Api/          # .NET 8 Minimal API
-  HotelStay.Tests/        # xUnit tests
-  hotelstay-ui/           # Angular frontend
-  README.md
-  spec.md
-  prompts.md
-  reflection.md
-```
-
-## Setup
+## Run Locally
 
 Prerequisites:
 
-- .NET 8 SDK compatible with the installed SDK
+- .NET 8 SDK
 - Node.js and npm
+- Chrome for the Playwright e2e test
 
 Restore and test backend:
 
 ```powershell
 dotnet restore HotelStay.sln
-dotnet test HotelStay.sln
+dotnet test HotelStay.Tests\HotelStay.Tests.csproj
 ```
 
 Run API:
 
 ```powershell
-dotnet run --project HotelStay.Api --launch-profile http
+dotnet run --project HotelStay.Api\HotelStay.Api.csproj --launch-profile http
 ```
 
-The API listens on `http://localhost:5000` for the `http` launch profile.
-
-Install and build frontend:
+Install frontend dependencies:
 
 ```powershell
 Push-Location hotelstay-ui
 npm install
-npm run build
 Pop-Location
 ```
 
@@ -136,26 +197,49 @@ npm start
 Pop-Location
 ```
 
-The Angular dev server uses `http://localhost:4200` and the API CORS policy allows that origin.
+The Angular app runs at `http://localhost:4200`.
 
-## Testing
+## Run Tests
 
-The xUnit suite covers:
+Backend unit and API integration tests:
 
-- PremierStays normalization
-- BudgetNests room filtering
-- Room type mapping
-- Total stay price calculation
-- Date validation
-- Domestic and international document validation
-- Reservation reference generation
-- Multi-provider availability service composition
+```powershell
+dotnet test HotelStay.Tests\HotelStay.Tests.csproj
+```
 
-## AI Tooling Approach
+Angular unit tests:
 
-GitHub Copilot Enterprise Agent Mode was used in two phases:
+```powershell
+Push-Location hotelstay-ui
+npm test -- --watch=false --browsers=ChromeHeadless
+Pop-Location
+```
 
-- Design phase: create README, specification, prompt log, and reflection structure before implementation.
-- Scaffold phase: generate the .NET solution, API, tests, Angular client, and updated documentation from the approved requirements.
+Playwright e2e test:
 
-Prompt history and workflow notes are captured in [prompts.md](prompts.md). Implementation observations are captured in [reflection.md](reflection.md).
+```powershell
+Push-Location hotelstay-ui
+npm run e2e
+Pop-Location
+```
+
+The Playwright configuration starts or reuses the API at `http://localhost:5000` and Angular at `http://localhost:4200`.
+
+## Repository Structure
+
+```text
+hotel-stay-availability/
+  .github/copilot-instructions.md
+  .prompts/
+  HotelStay.Api/
+  HotelStay.Tests/
+  hotelstay-ui/
+  README.md
+  spec.md
+  prompts.md
+  reflection.md
+```
+
+## AI Usage
+
+GitHub Copilot Enterprise Agent Mode in VS Code was used across analysis, specification, implementation, testing, documentation, refactoring, and validation. Prompt history is captured in [prompts.md](prompts.md), and design/tooling trade-offs are captured in [reflection.md](reflection.md).
