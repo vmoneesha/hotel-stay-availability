@@ -439,6 +439,21 @@ Do not modify production code unless a small change is required to improve testa
 
 Purpose: add deterministic Angular TestBed coverage for API calls, selection-store state, search form validation, hotel card interaction, reservation form document rules, search/reservation page workflows, and confirmation lookup behavior.
 
+## Prompt 14: Runtime, Test, and Validation Prompt Files
+
+```text
+Add .prompts/
+
+run-application.prompt.md
+run-tests.prompt.md
+validate-solution.prompt.md
+
+Create reusable GitHub Copilot prompt files for running the complete application, running all tests, and validating the full solution.
+The run-application prompt must cover backend startup, frontend startup, Swagger/OpenAPI, endpoint availability, browser console checks, and complete booking workflow verification.
+```
+
+Purpose: add reusable operational prompts for running the full solution, executing backend/frontend tests, and validating builds, runtime behavior, API/frontend integration, and booking workflows before handoff.
+
 
 ## Prompt Purposes
 
@@ -460,6 +475,7 @@ Purpose: add deterministic Angular TestBed coverage for API calls, selection-sto
 | Confirmation action simplification | Remove duplicate finish-booking action | `ConfirmationComponent` template |
 | Comprehensive xUnit tests | Add broad domain service and provider behavior coverage | `HotelStay.Tests/DomainServiceTests.cs` |
 | Comprehensive Angular unit tests | Add frontend service, component, form, HTTP, and workflow coverage | `hotelstay-ui/src/app/**/*.spec.ts` |
+| Runtime, test, and validation prompt files | Add reusable operational prompt assets | `.prompts/run-application.prompt.md`, `.prompts/run-tests.prompt.md`, `.prompts/validate-solution.prompt.md` |
 | Provider architecture requirements | Preserve extensibility | `IHotelProvider`, provider mappers, DI registration |
 | Validation and testing requirements | Encode expected behavior | xUnit tests for mapping, price, filtering, date, document, and reference rules |
 
@@ -483,3 +499,4 @@ Purpose: add deterministic Angular TestBed coverage for API calls, selection-sto
 - Keep international document mismatch UX guided: show a clear message, disable dependent fields when needed, and provide an easy path back to a valid Passport selection.
 - Keep confirmation actions focused; avoid duplicate navigation choices that lead to the same route.
 - Keep backend behavior covered with focused xUnit tests that use real deterministic providers and services when practical.
+- Keep operational prompt files focused on running, testing, and validating the existing solution without changing working functionality.
