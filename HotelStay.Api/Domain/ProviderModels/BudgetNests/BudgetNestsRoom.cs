@@ -11,4 +11,5 @@ public sealed record BudgetNestsRoom(
     [property: JsonPropertyName("destination")] string Destination,
     [property: JsonPropertyName("room_type")] string RoomType,
     [property: JsonPropertyName("nightly_rate")] decimal NightlyRate,
+    [property: JsonPropertyName("cancellation")] string Cancellation,
     [property: JsonPropertyName("available")] bool Available);

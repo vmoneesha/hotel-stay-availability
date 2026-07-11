@@ -117,6 +117,99 @@ Only create the reusable prompt files inside the .prompts folder.
 
 Purpose: create reusable lifecycle prompt files for provider extension, endpoint generation, test generation, and provider normalization while preserving the solution architecture and offline deterministic constraints.
 
+## Prompt 5: Domain Layer Only
+
+```text
+Continue working in the existing Hotel Stay Availability repository.
+
+Use the existing repository context including:
+
+- spec.md
+- README.md
+- .github/copilot-instructions.md
+- .prompts
+- Previous design decisions
+
+Do not regenerate any existing files.
+
+Implement ONLY the domain layer.
+
+Generate:
+
+Enums
+- RoomType
+- CancellationPolicy
+- DocumentType
+
+DTOs
+- HotelSearchRequest
+- HotelRoomDto
+- ReservationRequest
+- ReservationResponse
+- ReservationDetailsDto
+
+Provider Contracts
+- IHotelProvider
+
+Provider Models
+- PremierStays models
+- BudgetNests models
+
+Requirements
+
+- .NET 8
+- C# 12
+- record DTOs
+- XML comments only for public contracts
+- compile-ready code
+- explain each generated file
+- do not implement services
+- do not implement endpoints
+```
+
+Purpose: add an additive domain contract layer without changing existing runtime endpoints, services, mappers, repositories, or provider implementations.
+
+## Prompt 6: Provider Layer Only
+
+```text
+Using the existing architecture, implement only the provider layer.
+
+Generate
+
+PremierStaysProvider
+
+BudgetNestsProvider
+
+Implement IHotelProvider.
+
+Requirements
+
+PremierStays
+
+- PascalCase response
+- Rate
+- Amenities
+- Star Rating
+- Cancellation Policy
+
+BudgetNests
+
+- snake_case response
+- available flag
+- cancellation
+- nightly rate
+
+The providers must be deterministic.
+
+Use hardcoded sample data.
+
+BudgetNests must return some unavailable rooms.
+
+Do not generate services or endpoints.
+```
+
+Purpose: add deterministic provider-layer implementations over the domain `IHotelProvider` contract without adding services, endpoints, or orchestration logic.
+
 ## Prompt Purposes
 
 | Prompt | Purpose | Result |
@@ -125,6 +218,8 @@ Purpose: create reusable lifecycle prompt files for provider extension, endpoint
 | Full solution scaffold | Generate runnable solution | `HotelStay.sln`, `HotelStay.Api`, `HotelStay.Tests`, `hotelstay-ui` |
 | Repository-level Copilot instructions | Standardize future AI-assisted work | `.github/copilot-instructions.md` |
 | Reusable prompt engineering assets | Create lifecycle prompt files | `.prompts/*.prompt.md` |
+| Domain layer only | Add domain contracts without implementation logic | `HotelStay.Api/Domain` |
+| Provider layer only | Add deterministic domain providers without services/endpoints | `HotelStay.Api/Domain/Providers` |
 | Provider architecture requirements | Preserve extensibility | `IHotelProvider`, provider mappers, DI registration |
 | Validation and testing requirements | Encode expected behavior | xUnit tests for mapping, price, filtering, date, document, and reference rules |
 
@@ -138,3 +233,5 @@ Purpose: create reusable lifecycle prompt files for provider extension, endpoint
 - Keep offline determinism unless a future prompt explicitly changes that constraint.
 - Update `.github/copilot-instructions.md` whenever architectural constraints or coding conventions materially change.
 - Keep reusable prompt files in `.prompts` synchronized with current architecture and technology choices.
+- Keep domain contracts additive until the implementation layer is intentionally migrated to consume them.
+- Keep provider-layer additions deterministic and isolated from services, endpoints, and existing provider implementations unless a migration is explicitly requested.
