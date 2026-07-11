@@ -399,6 +399,29 @@ Explain the implementation approach before generating the code.
 
 Purpose: add the booking progress indicator, sticky booking summary, enhanced reservation form layout, and polished confirmation success page while keeping backend code unchanged.
 
+## Prompt 12: Comprehensive xUnit Tests
+
+```text
+Generate comprehensive xUnit tests.
+
+Cover
+
+DocumentValidationService
+HotelSearchService
+ReservationService
+Provider normalization
+Unavailable room filtering
+Price calculation
+Boundary conditions
+Positive
+Negative
+Arrange Act Assert.
+
+Explain each test.
+```
+
+Purpose: add focused domain-level xUnit coverage for document validation, hotel search normalization/filtering/ordering, price calculations, reservation confirmations, invalid document handling, and boundary scenarios using explicit Arrange / Act / Assert sections.
+
 
 ## Prompt Purposes
 
@@ -418,6 +441,7 @@ Purpose: add the booking progress indicator, sticky booking summary, enhanced re
 | Document validation parity | Align frontend and backend document rules | `DocumentValidationService`, `ReservationValidator`, `ReservationFormComponent`, validation tests |
 | International National ID UX | Make invalid international National ID selection guided and recoverable | `ReservationFormComponent` |
 | Confirmation action simplification | Remove duplicate finish-booking action | `ConfirmationComponent` template |
+| Comprehensive xUnit tests | Add broad domain service and provider behavior coverage | `HotelStay.Tests/DomainServiceTests.cs` |
 | Provider architecture requirements | Preserve extensibility | `IHotelProvider`, provider mappers, DI registration |
 | Validation and testing requirements | Encode expected behavior | xUnit tests for mapping, price, filtering, date, document, and reference rules |
 
@@ -440,3 +464,4 @@ Purpose: add the booking progress indicator, sticky booking summary, enhanced re
 - Keep document validation rules implemented in both Angular Reactive Forms and backend services/validators.
 - Keep international document mismatch UX guided: show a clear message, disable dependent fields when needed, and provide an easy path back to a valid Passport selection.
 - Keep confirmation actions focused; avoid duplicate navigation choices that lead to the same route.
+- Keep backend behavior covered with focused xUnit tests that use real deterministic providers and services when practical.
