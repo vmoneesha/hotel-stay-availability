@@ -1,0 +1,115 @@
+@use '../../../../styles/tokens' as *;
+
+.booking-summary {
+  display: grid;
+  gap: 1rem;
+  border: 1px solid $color-line;
+  border-radius: 22px;
+  padding: clamp(1rem, 2vw, 1.35rem);
+  background: white;
+  box-shadow: $shadow-soft;
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+}
+
+h2,
+p,
+dl {
+  margin: 0;
+}
+
+h2 {
+  color: $color-ink;
+  font-size: clamp(1.25rem, 3vw, 1.7rem);
+  line-height: 1.15;
+}
+
+.badge-row,
+.amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.icon-chip,
+.amenities li {
+  border-radius: $radius-pill;
+  padding: 0.34rem 0.68rem;
+  color: $color-muted;
+  background: #f1f5f9;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+
+  div {
+    border-radius: 14px;
+    padding: 0.75rem;
+    background: #f8fbff;
+  }
+
+  dt {
+    color: $color-muted;
+    font-size: 0.76rem;
+    font-weight: 850;
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 0.2rem 0 0;
+    color: $color-ink;
+    font-weight: 900;
+  }
+}
+
+.policy-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.55rem;
+  align-items: start;
+  border-radius: 14px;
+  padding: 0.85rem;
+  color: $color-success;
+  background: rgba(15, 138, 95, 0.08);
+  font-weight: 850;
+
+  span {
+    display: grid;
+    width: 24px;
+    height: 24px;
+    place-items: center;
+    border-radius: 999px;
+    color: white;
+    background: $color-success;
+    font-size: 0.85rem;
+  }
+}
+
+.amenities {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.compact {
+  box-shadow: none;
+}
+
+@media (max-width: 520px) {
+  .summary-header {
+    display: grid;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

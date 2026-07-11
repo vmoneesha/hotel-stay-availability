@@ -30,31 +30,28 @@ public sealed class ValidationTests
         Assert.Contains(result.Errors, error => error.Field == "checkOut");
     }
 
-    [Theory]
-    [InlineData("Hyderabad", DocumentType.Passport, "NationalId")]
-    [InlineData("London", DocumentType.NationalId, "Passport")]
-    public void ReservationValidator_ReturnsUnprocessableEntityForDocumentMismatch(
-        string destination,
-        DocumentType suppliedDocument,
-        string expectedDocument)
+    [Fact]
+    public void ReservationValidator_ReturnsUnprocessableEntityWhenInternationalDestinationUsesNationalId()
     {
         var validator = new ReservationValidator();
-        var request = ValidReservation(destination) with { DocumentType = suppliedDocument };
+        var request = ValidReservation("London") with { DocumentType = DocumentType.NationalId };
 
         var result = validator.Validate(request);
 
         Assert.False(result.HasBadRequestErrors);
         var error = Assert.Single(result.UnprocessableEntityErrors);
         Assert.Equal("documentType", error.Field);
-        Assert.Contains(expectedDocument, error.Message);
+        Assert.Contains("London requires a valid Passport", error.Message);
     }
 
-    [Fact]
-    public void ReservationValidator_AcceptsDomesticNationalId()
+    [Theory]
+    [InlineData(DocumentType.NationalId)]
+    [InlineData(DocumentType.Passport)]
+    public void ReservationValidator_AcceptsDomesticNationalIdAndPassport(DocumentType documentType)
     {
         var validator = new ReservationValidator();
 
-        var result = validator.Validate(ValidReservation("Bangalore") with { DocumentType = DocumentType.NationalId });
+        var result = validator.Validate(ValidReservation("Bangalore") with { DocumentType = documentType });
 
         Assert.False(result.HasBadRequestErrors);
         Assert.False(result.HasUnprocessableEntityErrors);

@@ -1,19 +1,17 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
+import { FooterComponent } from './shared/components/footer/footer.component';
+import { HeaderComponent } from './shared/components/header/header.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterLink, RouterOutlet],
+  imports: [FooterComponent, HeaderComponent, RouterOutlet],
   template: `
-    <header class="shell-header">
-      <a routerLink="/search" class="brand">Hotel Stay Availability</a>
-      <nav aria-label="Primary navigation">
-        <a routerLink="/search">Search</a>
-      </nav>
-    </header>
+    <app-header />
     <main class="shell-main">
       <router-outlet />
     </main>
+    <app-footer />
   `
 })
 export class AppComponent {}

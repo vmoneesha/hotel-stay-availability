@@ -1,0 +1,17 @@
+<nav class="booking-progress" aria-label="Booking progress">
+  @for (step of steps; track step.number) {
+    <div class="step" [class.complete]="stateFor(step) === 'complete'" [class.active]="stateFor(step) === 'active'" [class.upcoming]="stateFor(step) === 'upcoming'">
+      <span class="step-marker" aria-hidden="true">
+        @if (stateFor(step) === 'complete') {
+          <span class="check-icon">✓</span>
+        } @else {
+          {{ step.number }}
+        }
+      </span>
+      <span class="step-copy">
+        <small>Step {{ step.number }}</small>
+        <strong>{{ step.title }}</strong>
+      </span>
+    </div>
+  }
+</nav>

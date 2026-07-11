@@ -1,0 +1,20 @@
+@use '../../../styles/tokens' as *;
+
+.search-page {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.hero-panel {
+  border-radius: 24px;
+  padding: clamp(1.4rem, 4vw, 3rem);
+  color: $color-ink;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(231, 241, 255, 0.94)),
+    linear-gradient(90deg, rgba(0, 108, 228, 0.18), rgba(255, 255, 255, 0));
+}
+
+.results-area {
+  display: grid;
+  gap: 1rem;
+}

@@ -1,0 +1,33 @@
+@use '../../../../styles/tokens' as *;
+
+.empty-state {
+  display: grid;
+  gap: 0.55rem;
+  place-items: center;
+  min-height: 220px;
+  border: 1px dashed #b9c9db;
+  border-radius: $radius-card;
+  padding: 2rem;
+  text-align: center;
+  background: white;
+
+  div {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border-radius: 14px;
+    color: $color-primary;
+    background: $color-primary-soft;
+    font-weight: 900;
+  }
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  p {
+    color: $color-muted;
+  }
+}

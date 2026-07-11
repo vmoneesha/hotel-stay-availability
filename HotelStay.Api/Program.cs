@@ -84,10 +84,9 @@ app.MapPost("/hotels/reserve", Results<Created<ReservationResponse>, BadRequest<
 
 	if (!documentValidationService.IsValidForDestination(request.Destination, request.DocumentType))
 	{
-		var requiredDocument = documentValidationService.GetRequiredDocumentType(request.Destination);
 		var errors = new[]
 		{
-			new ApiValidationError("documentType", $"{request.Destination} requires {requiredDocument}.")
+			new ApiValidationError("documentType", documentValidationService.GetValidationMessage(request.Destination))
 		};
 		return TypedResults.UnprocessableEntity(ApiValidationProblemResponse.From(errors));
 	}

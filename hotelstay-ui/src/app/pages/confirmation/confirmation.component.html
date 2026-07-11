@@ -1,22 +1,16 @@
 @if (loading) {
-  <section class="panel state-panel">Loading reservation confirmation...</section>
+  <app-loading-spinner label="Loading reservation confirmation..." />
 } @else if (error) {
-  <section class="panel state-panel">
-    <h1>{{ error }}</h1>
-    <a routerLink="/search" class="text-link">Back to search</a>
+  <section class="confirmation-page">
+    <app-empty-state [title]="error" message="Search again or check the reservation reference." />
+    <a mat-stroked-button routerLink="/search" class="secondary-button">Back to Search</a>
   </section>
 } @else if (reservation) {
-  <section class="confirmation-panel">
-    <p class="eyebrow">Reservation confirmed</p>
-    <h1>{{ reservation.reference }}</h1>
-    <dl>
-      <div><dt>Guest</dt><dd>{{ reservation.guestName }}</dd></div>
-      <div><dt>Destination</dt><dd>{{ reservation.destination }}</dd></div>
-      <div><dt>Stay</dt><dd>{{ reservation.checkIn }} to {{ reservation.checkOut }}</dd></div>
-      <div><dt>Room</dt><dd>{{ reservation.roomType }} via {{ reservation.provider }}</dd></div>
-      <div><dt>Total</dt><dd>{{ reservation.totalStayPrice | currency:'INR':'symbol-narrow' }}</dd></div>
-      <div><dt>Created</dt><dd>{{ reservation.createdAtUtc | date:'medium' }}</dd></div>
-    </dl>
-    <a routerLink="/search" class="text-link">Search another stay</a>
+  <section class="confirmation-page">
+    <app-booking-progress [currentStep]="3" />
+    <app-confirmation-card [reservation]="reservation" [room]="room" />
+    <div class="confirmation-actions" aria-label="Confirmation actions">
+      <a mat-flat-button routerLink="/search" class="primary-button">Book Another Hotel</a>
+    </div>
   </section>
 }

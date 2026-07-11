@@ -1,8 +1,9 @@
 export type RoomType = 'Standard' | 'Deluxe' | 'Suite';
 export type DocumentType = 'NationalId' | 'Passport';
+export type SortOption = 'totalPrice' | 'roomType';
 
 export interface HotelRoomDto {
-  provider: string;
+  providerCode: string;
   providerBadge: string;
   hotelId: string;
   hotelName: string;
@@ -15,6 +16,7 @@ export interface HotelRoomDto {
   amenities: string[];
   starRating: number | null;
   cancellationPolicy: string;
+  cancellationPolicyDescription: string;
 }
 
 export interface HotelSearchResponse {
@@ -28,7 +30,7 @@ export interface ReserveRoomRequest {
   destination: string;
   checkIn: string;
   checkOut: string;
-  provider: string;
+  providerCode: string;
   hotelId: string;
   roomId: string;
   roomType: RoomType;
@@ -54,4 +56,11 @@ export interface SelectedRoomContext {
   room: HotelRoomDto;
   checkIn: string;
   checkOut: string;
+}
+
+export interface SearchFormValue {
+  destination: string;
+  checkIn: string;
+  checkOut: string;
+  roomType: RoomType | '';
 }

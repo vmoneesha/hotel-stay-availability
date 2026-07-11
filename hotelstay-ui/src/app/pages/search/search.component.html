@@ -1,72 +1,25 @@
-<section class="page-grid">
-  <div class="panel search-panel">
-    <p class="eyebrow">Offline deterministic inventory</p>
-    <h1>Find an available stay</h1>
-    <form [formGroup]="form" (ngSubmit)="search()" class="search-form">
-      <label>
-        Destination
-        <select formControlName="destination">
-          <option value="">Select destination</option>
-          @for (destination of destinations; track destination) {
-            <option [value]="destination">{{ destination }}</option>
-          }
-        </select>
-      </label>
-      <label>
-        Check-in
-        <input type="date" formControlName="checkIn">
-      </label>
-      <label>
-        Check-out
-        <input type="date" formControlName="checkOut">
-      </label>
-      <label>
-        Room type
-        <select formControlName="roomType">
-          @for (roomType of roomTypes; track roomType) {
-            <option [value]="roomType">{{ roomType || 'Any room type' }}</option>
-          }
-        </select>
-      </label>
-      <button type="submit" [disabled]="loading">{{ loading ? 'Searching...' : 'Search rooms' }}</button>
-    </form>
+<section class="search-page">
+  <div class="hero-panel">
+    <p class="eyebrow">Offline hotel availability</p>
+    <h1 class="page-title">Book a stay with clear prices and verified room rules.</h1>
+    <p class="page-subtitle">Compare deterministic PremierStays and BudgetNests inventory across domestic and international destinations.</p>
   </div>
 
-  <div class="results-column">
-    @if (validationErrors.length > 0) {
-      <div class="alert" role="alert">
-        @for (error of validationErrors; track error) {
-          <p>{{ error }}</p>
-        }
-      </div>
-    }
+  <app-search-bar (search)="search($event)" />
 
-    @if (loading) {
-      <div class="panel state-panel">Loading available rooms...</div>
-    } @else if (searched && rooms.length === 0 && validationErrors.length === 0) {
-      <div class="panel state-panel">No rooms matched the selected destination, dates, and room type.</div>
-    } @else {
-      @for (room of rooms; track room.provider + room.roomId) {
-        <article class="room-card">
-          <div>
-            <span class="badge">{{ room.providerBadge }}</span>
-            <h2>{{ room.hotelName }}</h2>
-            <p>{{ room.destination }} · {{ room.roomType }} · {{ room.nights }} nights</p>
-            <p>{{ room.cancellationPolicy }}</p>
-            @if (room.starRating) {
-              <p>{{ room.starRating }} star rating</p>
-            }
-            @if (room.amenities.length > 0) {
-              <p>{{ room.amenities.join(' · ') }}</p>
-            }
-          </div>
-          <div class="price-box">
-            <strong>{{ room.totalStayPrice | currency:'INR':'symbol-narrow' }}</strong>
-            <span>{{ room.perNightPrice | currency:'INR':'symbol-narrow' }} per night</span>
-            <button type="button" (click)="reserve(room)">Reserve</button>
-          </div>
-        </article>
-      }
+  <div class="results-area">
+    <app-error-message [messages]="validationErrors()" />
+
+    @if (loading()) {
+      <app-loading-spinner label="Searching deterministic provider inventory..." />
+    } @else if (searched() && sortedRooms().length === 0 && validationErrors().length === 0) {
+      <app-empty-state />
+    } @else if (sortedRooms().length > 0) {
+      <app-hotel-results-list
+        [rooms]="sortedRooms()"
+        [sortBy]="sortBy()"
+        (sortChange)="updateSort($event)"
+        (reserve)="reserve($event)" />
     }
   </div>
 </section>

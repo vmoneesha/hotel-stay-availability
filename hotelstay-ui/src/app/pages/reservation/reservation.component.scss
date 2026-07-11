@@ -1,0 +1,73 @@
+@use '../../../styles/tokens' as *;
+
+.reservation-page {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.form-panel,
+.missing-selection {
+  border: 1px solid $color-line;
+  border-radius: 22px;
+  background: white;
+  box-shadow: $shadow-soft;
+}
+
+.reservation-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.82fr) minmax(0, 1.18fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  color: $color-ink;
+  font-size: clamp(1.75rem, 4vw, 2.85rem);
+  line-height: 1.05;
+}
+
+.summary-rail {
+  position: sticky;
+  top: 92px;
+}
+
+.form-panel,
+.missing-selection {
+  padding: clamp(1.2rem, 4vw, 2rem);
+}
+
+.missing-selection {
+  display: grid;
+  gap: 0.8rem;
+  justify-items: start;
+}
+
+.form-panel {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.form-heading {
+  display: grid;
+  gap: 0.55rem;
+
+  p:not(.eyebrow) {
+    color: $color-muted;
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 920px) {
+  .reservation-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-rail {
+    position: static;
+  }
+}

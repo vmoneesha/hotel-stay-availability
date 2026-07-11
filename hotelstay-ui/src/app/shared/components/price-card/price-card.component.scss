@@ -1,0 +1,31 @@
+@use '../../../../styles/tokens' as *;
+
+.price-card {
+  display: grid;
+  gap: 0.25rem;
+  justify-items: end;
+  min-width: 170px;
+  border-radius: 14px;
+  padding: 1rem;
+  background: #f7fbff;
+
+  .label,
+  small {
+    color: $color-muted;
+    font-size: 0.82rem;
+    font-weight: 750;
+  }
+
+  strong {
+    color: $color-ink;
+    font-size: 1.65rem;
+    line-height: 1;
+  }
+}
+
+@media (max-width: 720px) {
+  .price-card {
+    justify-items: start;
+    min-width: 0;
+  }
+}

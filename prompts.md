@@ -298,6 +298,108 @@ No frontend.
 
 Purpose: wire the Minimal API endpoints to the existing domain services using dependency injection, typed results, validation status codes, and in-memory reservation lookup without frontend changes.
 
+## Prompt 9: Frontend Implementation Only
+
+```text
+Do not regenerate any existing backend code.
+
+Implement ONLY the frontend for the Hotel Stay Availability Angular application.
+
+Requirements
+
+- Use Angular 20.
+- Use Standalone Components.
+- Use Angular Signals where appropriate.
+- Use Reactive Forms.
+- Use HttpClient to call the existing backend API.
+- Use SCSS.
+- Create a premium, modern, responsive hotel booking design inspired by Booking.com, but unique to this project.
+- Keep the UI responsive, accessible, and keyboard-friendly.
+- Display loading, empty, validation error, and success states.
+- Keep frontend models aligned with backend DTOs.
+- Do not hardcode provider-specific payloads in UI components.
+- Do not modify the backend.
+- Generate compile-ready Angular code only.
+- Explain each generated folder before generating files.
+```
+
+Purpose: create a componentized Angular booking experience with reusable search, results, reservation, confirmation, badge, loading, error, empty, and pricing components while preserving the existing backend API unchanged.
+
+## Prompt 10: Date Picker Validation
+
+```text
+Implement date picker validation for the Hotel Stay Availability Angular application.
+
+Requirements
+
+Check-in Date
+
+- Disable all dates before the current date.
+- Users must not be able to select any past date.
+- Set the minimum selectable date to today's date.
+- Default the check-in date to today's date.
+- Prevent manual entry of invalid past dates.
+
+Check-out Date
+
+- Disable all dates that are before or equal to the selected check-in date.
+- The minimum selectable check-out date must always be one day after the selected check-in date.
+- Automatically update the minimum check-out date whenever the check-in date changes.
+- If the user changes the check-in date and the existing check-out date becomes invalid, automatically clear the check-out date and prompt the user to select a new one.
+
+Validation
+
+- Use Angular Reactive Forms.
+- Validate dates in real time.
+- Show inline validation messages.
+- Highlight invalid fields.
+- Disable the Search button until all date validations pass.
+
+User Experience
+
+- Display today's date as the default check-in date.
+- Display tomorrow's date as the default check-out date.
+- Prevent users from selecting invalid dates through both the date picker and manual keyboard input.
+- Ensure the implementation works correctly across different time zones by comparing dates without time components.
+
+Implementation
+
+- Use Angular Material Datepicker (or the existing date picker used in the project).
+- Use strongly typed TypeScript.
+- Keep the implementation reusable.
+- Follow Angular best practices.
+- Do not modify any backend code.
+
+Explain the implementation before generating the code.
+```
+
+Purpose: strengthen the reusable Angular search bar with date-only defaults, dynamic minimum dates, real-time reactive validation, invalid field styling, and submit disabling without changing backend behavior.
+
+## Prompt 11: Reservation and Confirmation UX Enhancement
+
+```text
+Continue working in the existing Angular application.
+
+Enhance the Reservation and Confirmation workflow by improving the overall user experience and making the booking process feel similar to a modern hotel booking platform.
+
+Implement a three-step booking progress indicator:
+
+1. Your Selection
+2. Your Details
+3. Finish Booking
+
+Improve document selection based on destination, redesign the reservation details page, add a sticky booking summary, and redesign the confirmation page with a polished success experience.
+
+Use Angular Standalone Components, Angular Reactive Forms, Angular Material, SCSS, responsive layouts, reusable components, accessible design, clean typography, a blue and white theme, consistent spacing, and smooth transitions.
+
+Do not modify the backend.
+
+Explain the implementation approach before generating the code.
+```
+
+Purpose: add the booking progress indicator, sticky booking summary, enhanced reservation form layout, and polished confirmation success page while keeping backend code unchanged.
+
+
 ## Prompt Purposes
 
 | Prompt | Purpose | Result |
@@ -310,6 +412,12 @@ Purpose: wire the Minimal API endpoints to the existing domain services using de
 | Provider layer only | Add deterministic domain providers without services/endpoints | `HotelStay.Api/Domain/Providers` |
 | Business services only | Add provider search, reservation, and document services without endpoints | `HotelStay.Api/Domain/Services` |
 | Minimal API endpoints only | Wire API routes with TypedResults and DI | `HotelStay.Api/Program.cs` |
+| Frontend implementation only | Build the Angular booking UI without backend changes | `hotelstay-ui/src/app` |
+| Date picker validation | Add reusable date-only picker validation to search | `SearchBarComponent` |
+| Reservation and confirmation UX enhancement | Add booking progress, sticky summary, and polished success flow | `BookingProgressComponent`, `BookingSummaryCardComponent`, reservation/confirmation pages |
+| Document validation parity | Align frontend and backend document rules | `DocumentValidationService`, `ReservationValidator`, `ReservationFormComponent`, validation tests |
+| International National ID UX | Make invalid international National ID selection guided and recoverable | `ReservationFormComponent` |
+| Confirmation action simplification | Remove duplicate finish-booking action | `ConfirmationComponent` template |
 | Provider architecture requirements | Preserve extensibility | `IHotelProvider`, provider mappers, DI registration |
 | Validation and testing requirements | Encode expected behavior | xUnit tests for mapping, price, filtering, date, document, and reference rules |
 
@@ -327,3 +435,8 @@ Purpose: wire the Minimal API endpoints to the existing domain services using de
 - Keep provider-layer additions deterministic and isolated from services, endpoints, and existing provider implementations unless a migration is explicitly requested.
 - Keep business service additions endpoint-free until API integration is explicitly requested.
 - Keep endpoint prompts focused on routing, validation, status codes, DI, and delegation; do not introduce frontend work unless explicitly requested.
+- Keep frontend-only prompts scoped to `hotelstay-ui` and validate with `npm run build`.
+- Keep date validation reusable inside form components and compare date-only values to avoid timezone drift.
+- Keep document validation rules implemented in both Angular Reactive Forms and backend services/validators.
+- Keep international document mismatch UX guided: show a clear message, disable dependent fields when needed, and provide an easy path back to a valid Passport selection.
+- Keep confirmation actions focused; avoid duplicate navigation choices that lead to the same route.

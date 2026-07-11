@@ -1,0 +1,108 @@
+@use '../../../../styles/tokens' as *;
+
+.booking-progress {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  overflow: hidden;
+  border: 1px solid rgba(0, 108, 228, 0.18);
+  border-radius: 18px;
+  padding: 0.85rem;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: $shadow-soft;
+
+  &::before {
+    position: absolute;
+    top: 2.55rem;
+    right: 2rem;
+    left: 2rem;
+    height: 3px;
+    border-radius: 999px;
+    background: $color-line;
+    content: '';
+  }
+}
+
+.step {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.7rem;
+  align-items: center;
+  border-radius: 14px;
+  padding: 0.8rem;
+  background: white;
+  transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+
+  &.active {
+    background: #e7f1ff;
+    box-shadow: inset 0 0 0 1px rgba(0, 108, 228, 0.22);
+    transform: translateY(-1px);
+  }
+
+  &.complete .step-marker {
+    color: white;
+    background: $color-success;
+  }
+
+  &.active .step-marker {
+    color: white;
+    background: $color-primary;
+  }
+
+  &.upcoming {
+    color: $color-muted;
+  }
+}
+
+.step-marker {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 2px solid white;
+  border-radius: 999px;
+  background: #edf2f7;
+  font-weight: 900;
+  box-shadow: 0 0 0 4px white;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.check-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.step-copy {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+
+  small {
+    color: $color-muted;
+    font-size: 0.72rem;
+    font-weight: 850;
+    text-transform: uppercase;
+  }
+
+  strong {
+    color: $color-ink;
+    font-size: clamp(0.86rem, 2vw, 1rem);
+  }
+}
+
+@media (max-width: 760px) {
+  .booking-progress {
+    grid-template-columns: 1fr;
+
+    &::before {
+      top: 1.4rem;
+      bottom: 1.4rem;
+      left: 2.6rem;
+      width: 3px;
+      height: auto;
+    }
+  }
+}

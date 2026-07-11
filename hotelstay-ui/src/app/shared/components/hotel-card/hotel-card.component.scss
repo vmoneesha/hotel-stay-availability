@@ -1,0 +1,89 @@
+@use '../../../../styles/tokens' as *;
+
+.hotel-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.25rem;
+  border: 1px solid $color-line;
+  border-radius: $radius-card;
+  padding: 1.1rem;
+  background: white;
+  box-shadow: $shadow-soft;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+
+  &:hover {
+    border-color: rgba(0, 108, 228, 0.28);
+    box-shadow: $shadow-hover;
+    transform: translateY(-2px);
+  }
+}
+
+.hotel-content {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.star-rating {
+  color: #8a5a00;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+h2,
+p {
+  margin: 0;
+}
+
+h2 {
+  color: $color-ink;
+  font-size: clamp(1.18rem, 2vw, 1.45rem);
+}
+
+.destination,
+.policy {
+  color: $color-muted;
+  line-height: 1.5;
+}
+
+.policy {
+  color: $color-success;
+  font-weight: 800;
+}
+
+.amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    border-radius: $radius-pill;
+    padding: 0.3rem 0.65rem;
+    color: $color-muted;
+    background: #f1f5f9;
+    font-size: 0.82rem;
+    font-weight: 750;
+  }
+}
+
+.booking-column {
+  display: grid;
+  gap: 0.8rem;
+  align-content: space-between;
+  justify-items: stretch;
+}
+
+@media (max-width: 720px) {
+  .hotel-card {
+    grid-template-columns: 1fr;
+  }
+}

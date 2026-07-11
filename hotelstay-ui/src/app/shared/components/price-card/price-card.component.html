@@ -1,0 +1,5 @@
+<aside class="price-card" aria-label="Room price">
+  <span class="label">Total for {{ nights() }} nights</span>
+  <strong>{{ totalStayPrice() | currency:'INR':'symbol-narrow' }}</strong>
+  <small>{{ perNightPrice() | currency:'INR':'symbol-narrow' }} per night</small>
+</aside>

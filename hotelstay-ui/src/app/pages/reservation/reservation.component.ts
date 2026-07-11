@@ -1,91 +1,46 @@
-import { AsyncPipe, CurrencyPipe } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { DocumentType, ReserveRoomRequest, ValidationProblemResponse } from '../../models/hotel.models';
+import { ReserveRoomRequest, ValidationProblemResponse } from '../../models/hotel.models';
 import { HotelApiService } from '../../services/hotel-api.service';
 import { HotelSelectionStore } from '../../services/hotel-selection.store';
-import { documentLabel, requiredDocumentFor } from '../../validation/document-rules';
+import { BookingProgressComponent } from '../../shared/components/booking-progress/booking-progress.component';
+import { BookingSummaryCardComponent } from '../../shared/components/booking-summary-card/booking-summary-card.component';
+import { ReservationFormComponent } from '../../shared/components/reservation-form/reservation-form.component';
 
 @Component({
   selector: 'app-reservation',
-  imports: [AsyncPipe, CurrencyPipe, ReactiveFormsModule, RouterLink],
-  templateUrl: './reservation.component.html'
+  imports: [BookingProgressComponent, BookingSummaryCardComponent, ReservationFormComponent, RouterLink],
+  templateUrl: './reservation.component.html',
+  styleUrl: './reservation.component.scss'
 })
 export class ReservationComponent {
-  readonly selectedRoom$;
-  readonly documentTypes: DocumentType[] = ['NationalId', 'Passport'];
-  readonly form;
+  private readonly hotelApi = inject(HotelApiService);
+  private readonly selectionStore = inject(HotelSelectionStore);
+  private readonly router = inject(Router);
 
-  validationErrors: string[] = [];
-  loading = false;
+  readonly selectedRoom = this.selectionStore.selectedRoom;
+  readonly validationErrors = signal<string[]>([]);
+  readonly loading = signal(false);
 
-  constructor(
-    formBuilder: FormBuilder,
-    private readonly hotelApi: HotelApiService,
-    private readonly selectionStore: HotelSelectionStore,
-    private readonly router: Router) {
-    this.selectedRoom$ = this.selectionStore.selectedRoom$;
-    this.form = formBuilder.nonNullable.group({
-      guestName: ['', Validators.required],
-      documentType: ['NationalId' as DocumentType, Validators.required],
-      documentNumber: ['', Validators.required]
-    });
-  }
-
-  reserve(): void {
+  reserve(request: ReserveRoomRequest): void {
     const selected = this.selectionStore.current();
     if (!selected) {
-      this.validationErrors = ['Select a room before confirming a reservation.'];
+      this.validationErrors.set(['Select a room before confirming a reservation.']);
       return;
     }
 
-    const value = this.form.getRawValue();
-    const requiredDocument = requiredDocumentFor(selected.room.destination);
-    this.validationErrors = [];
-
-    if (!value.guestName) {
-      this.validationErrors.push('Guest name is required.');
-    }
-
-    if (!value.documentNumber) {
-      this.validationErrors.push('Document number is required.');
-    }
-
-    if (value.documentType !== requiredDocument) {
-      this.validationErrors.push(`${selected.room.destination} requires ${documentLabel(requiredDocument)}.`);
-    }
-
-    if (this.validationErrors.length > 0) {
-      return;
-    }
-
-    const request: ReserveRoomRequest = {
-      destination: selected.room.destination,
-      checkIn: selected.checkIn,
-      checkOut: selected.checkOut,
-      provider: selected.room.provider,
-      hotelId: selected.room.hotelId,
-      roomId: selected.room.roomId,
-      roomType: selected.room.roomType,
-      guestName: value.guestName,
-      documentType: value.documentType,
-      documentNumber: value.documentNumber,
-      perNightPrice: selected.room.perNightPrice
-    };
-
-    this.loading = true;
+    this.validationErrors.set([]);
+    this.loading.set(true);
     this.hotelApi.reserve(request)
-      .pipe(finalize(() => this.loading = false))
+      .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: reservation => void this.router.navigate(['/confirmation', reservation.reference]),
-        error: error => this.validationErrors = this.toErrorMessages(error.error)
+        next: reservation => {
+          this.selectionStore.rememberConfirmation(reservation.reference, selected.room);
+          void this.router.navigate(['/confirmation', reservation.reference]);
+        },
+        error: error => this.validationErrors.set(this.toErrorMessages(error.error))
       });
-  }
-
-  labelFor(documentType: DocumentType): string {
-    return documentLabel(documentType);
   }
 
   private toErrorMessages(problem: ValidationProblemResponse | undefined): string[] {

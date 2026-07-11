@@ -22,26 +22,28 @@ public sealed class DocumentValidationService
     };
 
     /// <summary>
-    /// Gets the required document type for a supported destination.
+    /// Returns true when the supplied document type satisfies the destination document rule.
     /// </summary>
-    public DocumentType GetRequiredDocumentType(string destination)
+    public bool IsValidForDestination(string destination, DocumentType documentType)
     {
         if (InternationalDestinations.Contains(destination))
         {
-            return DocumentType.Passport;
+            return documentType == DocumentType.Passport;
         }
 
         if (DomesticDestinations.Contains(destination))
         {
-            return DocumentType.NationalId;
+            return documentType is DocumentType.NationalId or DocumentType.Passport;
         }
 
         throw new ArgumentException($"Unsupported destination '{destination}'.", nameof(destination));
     }
 
     /// <summary>
-    /// Returns true when the supplied document type satisfies the destination document rule.
+    /// Returns a user-friendly validation message for a document mismatch.
     /// </summary>
-    public bool IsValidForDestination(string destination, DocumentType documentType) =>
-        GetRequiredDocumentType(destination) == documentType;
+    public string GetValidationMessage(string destination) =>
+        InternationalDestinations.Contains(destination)
+            ? $"{destination} requires a valid Passport for reservation."
+            : $"{destination} accepts either National ID or Passport for reservation.";
 }

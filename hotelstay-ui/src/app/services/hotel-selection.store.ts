@@ -1,17 +1,26 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { SelectedRoomContext } from '../models/hotel.models';
+import { Injectable, signal } from '@angular/core';
+import { HotelRoomDto, SelectedRoomContext } from '../models/hotel.models';
 
 @Injectable({ providedIn: 'root' })
 export class HotelSelectionStore {
-  private readonly selectedRoomSubject = new BehaviorSubject<SelectedRoomContext | null>(null);
-  readonly selectedRoom$ = this.selectedRoomSubject.asObservable();
+  private readonly selectedRoomSignal = signal<SelectedRoomContext | null>(null);
+  private readonly confirmationRooms = new Map<string, HotelRoomDto>();
+
+  readonly selectedRoom = this.selectedRoomSignal.asReadonly();
 
   select(context: SelectedRoomContext): void {
-    this.selectedRoomSubject.next(context);
+    this.selectedRoomSignal.set(context);
   }
 
   current(): SelectedRoomContext | null {
-    return this.selectedRoomSubject.value;
+    return this.selectedRoomSignal();
+  }
+
+  rememberConfirmation(reference: string, room: HotelRoomDto): void {
+    this.confirmationRooms.set(reference, room);
+  }
+
+  confirmedRoom(reference: string): HotelRoomDto | null {
+    return this.confirmationRooms.get(reference) ?? null;
   }
 }

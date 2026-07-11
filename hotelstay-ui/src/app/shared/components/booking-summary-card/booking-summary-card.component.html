@@ -1,0 +1,38 @@
+<article class="booking-summary" [class.compact]="compact()">
+  <div class="summary-header">
+    <div>
+      <p class="eyebrow">Selected hotel</p>
+      <h2>{{ room().hotelName }}</h2>
+    </div>
+    <app-provider-badge [label]="room().providerBadge || room().providerCode" />
+  </div>
+
+  <div class="badge-row">
+    <app-room-type-badge [roomType]="room().roomType" />
+    @if (room().starRating) {
+      <span class="icon-chip" aria-label="Star rating">★ {{ room().starRating }} star</span>
+    }
+  </div>
+
+  <dl class="summary-grid">
+    <div><dt>Destination</dt><dd>{{ room().destination }}</dd></div>
+    <div><dt>Check-in</dt><dd>{{ selected().checkIn }}</dd></div>
+    <div><dt>Check-out</dt><dd>{{ selected().checkOut }}</dd></div>
+    <div><dt>Nights</dt><dd>{{ room().nights }}</dd></div>
+    <div><dt>Per night</dt><dd>{{ room().perNightPrice | currency:'INR':'symbol-narrow' }}</dd></div>
+    <div><dt>Total</dt><dd>{{ room().totalStayPrice | currency:'INR':'symbol-narrow' }}</dd></div>
+  </dl>
+
+  <div class="policy-row">
+    <span aria-hidden="true">✓</span>
+    <p>{{ room().cancellationPolicyDescription || room().cancellationPolicy }}</p>
+  </div>
+
+  @if (room().amenities.length > 0) {
+    <ul class="amenities" aria-label="Amenities">
+      @for (amenity of room().amenities; track amenity) {
+        <li>{{ amenity }}</li>
+      }
+    </ul>
+  }
+</article>

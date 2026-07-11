@@ -1,0 +1,7 @@
+@if (messages().length > 0) {
+  <section class="error-message" role="alert">
+    @for (message of messages(); track message) {
+      <p>{{ message }}</p>
+    }
+  </section>
+}

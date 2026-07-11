@@ -1,0 +1,26 @@
+@use '../../../../styles/tokens' as *;
+
+.loading {
+  display: grid;
+  gap: 0.8rem;
+  place-items: center;
+  min-height: 180px;
+  border: 1px solid $color-line;
+  border-radius: $radius-card;
+  color: $color-muted;
+  background: white;
+  box-shadow: $shadow-soft;
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 4px solid $color-primary-soft;
+  border-top-color: $color-primary;
+  border-radius: 50%;
+  animation: spin 820ms linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

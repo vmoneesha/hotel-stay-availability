@@ -1,0 +1,25 @@
+<section class="confirmation-card">
+  <div class="success-hero">
+    <div class="success-mark" aria-hidden="true">✓</div>
+    <p class="eyebrow">Booking successful</p>
+    <h1>Your stay is confirmed</h1>
+    <p class="success-message">Thank you for booking with Hotel Stay Availability. Keep this reference handy for check-in and support.</p>
+    <div class="reference-pill">
+      <span>Reservation reference</span>
+      <strong>{{ reservation().reference }}</strong>
+    </div>
+  </div>
+
+  <dl class="confirmation-details">
+    <div><dt>Guest name</dt><dd>{{ reservation().guestName }}</dd></div>
+    <div><dt>Provider</dt><dd>{{ reservation().providerCode }}</dd></div>
+    <div><dt>Destination</dt><dd>{{ reservation().destination }}</dd></div>
+    <div><dt>Room type</dt><dd>{{ reservation().roomType }}</dd></div>
+    <div><dt>Check-in</dt><dd>{{ reservation().checkIn }}</dd></div>
+    <div><dt>Check-out</dt><dd>{{ reservation().checkOut }}</dd></div>
+    <div><dt>Nights</dt><dd>{{ reservation().nights }}</dd></div>
+    <div><dt>Total price</dt><dd>{{ reservation().totalStayPrice | currency:'INR':'symbol-narrow' }}</dd></div>
+    <div class="wide"><dt>Cancellation policy</dt><dd>{{ room()?.cancellationPolicyDescription || 'Available in selected room details' }}</dd></div>
+    <div class="wide"><dt>Created</dt><dd>{{ reservation().createdAtUtc | date:'medium' }}</dd></div>
+  </dl>
+</section>

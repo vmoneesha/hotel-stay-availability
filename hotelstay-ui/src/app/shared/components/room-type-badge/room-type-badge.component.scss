@@ -1,0 +1,14 @@
+@use '../../../../styles/tokens' as *;
+
+.room-type-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid rgba(0, 108, 228, 0.2);
+  border-radius: $radius-pill;
+  padding: 0.26rem 0.65rem;
+  color: $color-ink;
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 850;
+}

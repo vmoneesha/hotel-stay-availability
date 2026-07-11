@@ -1,0 +1,41 @@
+<form class="search-bar" [formGroup]="form" (ngSubmit)="submit()" aria-label="Hotel search">
+  <div class="field destination-field">
+    <label for="destination">Destination</label>
+    <select id="destination" formControlName="destination" [class.invalid]="isInvalid('destination')">
+      <option value="">Where are you going?</option>
+      @for (destination of destinations; track destination) {
+        <option [value]="destination">{{ destination }}</option>
+      }
+    </select>
+    @if (showError('destination')) {
+      <span class="field-error">Destination is required.</span>
+    }
+  </div>
+
+  <div class="field">
+    <label for="checkIn">Check-in</label>
+    <input id="checkIn" type="date" formControlName="checkIn" [min]="todayDate" [class.invalid]="isInvalid('checkIn')" (blur)="normalizeDateInput('checkIn')">
+    @if (showError('checkIn')) {
+      <span class="field-error">{{ checkInErrorMessage() }}</span>
+    }
+  </div>
+
+  <div class="field">
+    <label for="checkOut">Check-out</label>
+    <input id="checkOut" type="date" formControlName="checkOut" [min]="minCheckOutDate()" [class.invalid]="isInvalid('checkOut')" (blur)="normalizeDateInput('checkOut')">
+    @if (showError('checkOut')) {
+      <span class="field-error">{{ checkOutErrorMessage() }}</span>
+    }
+  </div>
+
+  <div class="field">
+    <label for="roomType">Room type</label>
+    <select id="roomType" formControlName="roomType">
+      @for (roomType of roomTypes; track roomType) {
+        <option [value]="roomType">{{ roomType || 'Any room type' }}</option>
+      }
+    </select>
+  </div>
+
+  <button class="primary-button" type="submit" [disabled]="form.invalid">Search</button>
+</form>

@@ -17,8 +17,7 @@ public sealed class ReservationService(DocumentValidationService documentValidat
     {
         if (!documentValidationService.IsValidForDestination(request.Destination, request.DocumentType))
         {
-            var requiredDocument = documentValidationService.GetRequiredDocumentType(request.Destination);
-            throw new InvalidOperationException($"{request.Destination} requires {requiredDocument}.");
+            throw new InvalidOperationException(documentValidationService.GetValidationMessage(request.Destination));
         }
 
         var nights = request.CheckOut.DayNumber - request.CheckIn.DayNumber;

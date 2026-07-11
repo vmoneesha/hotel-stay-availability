@@ -1,0 +1,14 @@
+@use '../../../../styles/tokens' as *;
+
+.error-message {
+  border: 1px solid rgba(180, 35, 24, 0.24);
+  border-radius: 14px;
+  padding: 1rem;
+  color: $color-danger;
+  background: #fff5f3;
+
+  p {
+    margin: 0.25rem 0;
+    font-weight: 750;
+  }
+}

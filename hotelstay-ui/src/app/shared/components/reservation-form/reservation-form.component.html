@@ -1,0 +1,55 @@
+<form class="reservation-form" [formGroup]="form" (ngSubmit)="submit()">
+  <app-error-message [messages]="localErrors.length ? localErrors : serverErrors()" />
+
+  <div class="field">
+    <label for="guestName">Guest name</label>
+    <input id="guestName" type="text" formControlName="guestName" autocomplete="name" [class.invalid]="showError('guestName')">
+    @if (showError('guestName')) {
+      <span class="field-error">Guest name is required.</span>
+    }
+  </div>
+
+  <div class="form-grid">
+    <div class="field">
+      <label for="documentType">Document type</label>
+      <select id="documentType" formControlName="documentType" [class.invalid]="showError('documentType')">
+        @for (documentType of documentTypes; track documentType) {
+          <option [value]="documentType">{{ labelFor(documentType) }}</option>
+        }
+      </select>
+      @if (showError('documentType')) {
+        <span class="field-error">{{ selectedDestination() }} requires Passport for reservation.</span>
+      }
+    </div>
+
+    <div class="field">
+      <label for="documentNumber">Document number</label>
+      <input id="documentNumber" type="text" formControlName="documentNumber" autocomplete="off" [class.invalid]="showError('documentNumber')" [attr.placeholder]="isDocumentNumberDisabled() ? 'Select Passport first' : 'Enter document number'">
+      @if (isDocumentNumberDisabled()) {
+        <span class="field-note">Document number is disabled until Passport is selected.</span>
+      } @else if (showError('documentNumber')) {
+        <span class="field-error">Document number is required.</span>
+      }
+    </div>
+  </div>
+
+  <p class="document-hint" [class.international]="isSelectedDestinationInternational()">
+    <span aria-hidden="true">i</span>
+    {{ documentMessage() }}
+  </p>
+
+  @if (hasDocumentTypeMismatch()) {
+    <aside class="document-warning" role="status" aria-live="polite">
+      <div class="warning-icon" aria-hidden="true">!</div>
+      <div>
+        <strong>Passport needed for {{ selectedDestination() }}</strong>
+        <p>National ID is available to select, but it cannot be used to complete an international booking.</p>
+      </div>
+      <button mat-stroked-button type="button" class="switch-document-button" (click)="usePassport()">Use Passport</button>
+    </aside>
+  }
+
+  <button mat-flat-button class="primary-button" type="submit" [disabled]="loading() || form.invalid">
+    {{ confirmButtonLabel() }}
+  </button>
+</form>

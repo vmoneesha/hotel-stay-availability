@@ -1,0 +1,13 @@
+@use '../../../../styles/tokens' as *;
+
+.provider-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border-radius: $radius-pill;
+  padding: 0.28rem 0.7rem;
+  color: $color-primary-strong;
+  background: $color-primary-soft;
+  font-size: 0.78rem;
+  font-weight: 900;
+}

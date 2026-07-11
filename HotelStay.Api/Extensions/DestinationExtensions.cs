@@ -23,6 +23,13 @@ public static class DestinationExtensions
 
     public static bool IsInternational(this string destination) => InternationalDestinations.Contains(destination);
 
-    public static DocumentType RequiredDocument(this string destination) =>
-        destination.IsInternational() ? DocumentType.Passport : DocumentType.NationalId;
+    public static bool AcceptsDocument(this string destination, DocumentType documentType) =>
+        destination.IsInternational()
+            ? documentType == DocumentType.Passport
+            : documentType is DocumentType.NationalId or DocumentType.Passport;
+
+    public static string DocumentValidationMessage(this string destination) =>
+        destination.IsInternational()
+            ? $"{destination} requires a valid Passport for reservation."
+            : $"{destination} accepts either National ID or Passport for reservation.";
 }

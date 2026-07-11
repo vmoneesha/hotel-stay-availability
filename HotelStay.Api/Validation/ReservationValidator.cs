@@ -35,10 +35,9 @@ public sealed class ReservationValidator : IReservationValidator
         }
 
         var destination = request.Destination?.Trim() ?? string.Empty;
-        if (!string.IsNullOrWhiteSpace(destination) && request.DocumentType != destination.RequiredDocument())
+        if (!string.IsNullOrWhiteSpace(destination) && !destination.AcceptsDocument(request.DocumentType))
         {
-            var expectedDocument = destination.RequiredDocument();
-            unprocessableEntityErrors.Add(new ValidationError("documentType", $"{destination} requires {expectedDocument}."));
+            unprocessableEntityErrors.Add(new ValidationError("documentType", destination.DocumentValidationMessage()));
         }
 
         var draft = new ReservationDraft(

@@ -1,0 +1,21 @@
+<section class="results-list" aria-label="Available hotel rooms">
+  <div class="results-toolbar">
+    <div>
+      <strong>{{ rooms().length }}</strong>
+      <span>{{ rooms().length === 1 ? 'available stay' : 'available stays' }}</span>
+    </div>
+    <label>
+      Sort by
+      <select [value]="sortBy()" (change)="sortChange.emit($any($event.target).value)">
+        <option value="totalPrice">Total price</option>
+        <option value="roomType">Room type</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="cards">
+    @for (room of rooms(); track room.providerCode + room.roomId) {
+      <app-hotel-card [room]="room" (reserve)="reserve.emit($event)" />
+    }
+  </div>
+</section>

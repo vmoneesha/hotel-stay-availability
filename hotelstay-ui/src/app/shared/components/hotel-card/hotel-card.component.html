@@ -1,0 +1,31 @@
+<article class="hotel-card">
+  <div class="hotel-content">
+    <div class="badge-row">
+      <app-provider-badge [label]="room().providerBadge || room().providerCode" />
+      <app-room-type-badge [roomType]="room().roomType" />
+      @if (room().starRating) {
+        <span class="star-rating">{{ room().starRating }} star</span>
+      }
+    </div>
+
+    <h2>{{ room().hotelName }}</h2>
+    <p class="destination">{{ room().destination }} · {{ room().roomType }} room</p>
+    <p class="policy">{{ room().cancellationPolicyDescription || room().cancellationPolicy }}</p>
+
+    @if (room().amenities.length > 0) {
+      <ul class="amenities" aria-label="Amenities">
+        @for (amenity of room().amenities; track amenity) {
+          <li>{{ amenity }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  <div class="booking-column">
+    <app-price-card
+      [perNightPrice]="room().perNightPrice"
+      [totalStayPrice]="room().totalStayPrice"
+      [nights]="room().nights" />
+    <button type="button" class="primary-button" (click)="reserveRoom()">Reserve</button>
+  </div>
+</article>

@@ -1,0 +1,56 @@
+@use '../../../../styles/tokens' as *;
+
+.results-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.results-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid $color-line;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  background: white;
+
+  strong {
+    color: $color-primary;
+    font-size: 1.2rem;
+  }
+
+  span {
+    margin-left: 0.35rem;
+    color: $color-muted;
+    font-weight: 800;
+  }
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: $color-muted;
+    font-size: 0.88rem;
+    font-weight: 800;
+  }
+
+  select {
+    border: 1px solid $color-line;
+    border-radius: 10px;
+    padding: 0.55rem 0.7rem;
+    background: white;
+  }
+}
+
+.cards {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .results-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
