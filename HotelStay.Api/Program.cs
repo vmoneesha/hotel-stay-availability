@@ -1,12 +1,26 @@
-using HotelStay.Api.Dtos;
+using System.Collections.Concurrent;
 using HotelStay.Api.Extensions;
-using HotelStay.Api.Services;
-using HotelStay.Api.Validation;
 using System.Text.Json.Serialization;
+using HotelStay.Api.Domain.Dtos;
+using HotelStay.Api.Domain.Enums;
+using HotelStay.Api.Domain.ProviderContracts;
+using HotelStay.Api.Domain.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
+using ApiValidationError = HotelStay.Api.Dtos.ValidationError;
+using ApiValidationProblemResponse = HotelStay.Api.Dtos.ValidationProblemResponse;
+using DomainBudgetNestsProvider = HotelStay.Api.Domain.Providers.BudgetNestsProvider;
+using DomainPremierStaysProvider = HotelStay.Api.Domain.Providers.PremierStaysProvider;
+using DomainReservationService = HotelStay.Api.Domain.Services.ReservationService;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHotelStayServices();
+builder.Services.AddSingleton<IHotelProvider, DomainPremierStaysProvider>();
+builder.Services.AddSingleton<IHotelProvider, DomainBudgetNestsProvider>();
+builder.Services.AddSingleton<HotelSearchService>();
+builder.Services.AddSingleton<DocumentValidationService>();
+builder.Services.AddSingleton<DomainReservationService>();
+builder.Services.AddSingleton<ConcurrentDictionary<string, ReservationResponse>>();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
 	options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -25,7 +39,7 @@ var app = builder.Build();
 
 app.UseCors("HotelStayUi");
 
-app.MapGet("/", () => Results.Ok(new
+app.MapGet("/", () => TypedResults.Ok(new
 {
 	name = "Hotel Stay Availability API",
 	status = "Running",
@@ -37,58 +51,130 @@ app.MapGet("/", () => Results.Ok(new
 	}
 }));
 
-app.MapGet("/hotels/search", async (
+app.MapGet("/hotels/search", async Task<Results<Ok<IReadOnlyCollection<HotelRoomDto>>, BadRequest<ApiValidationProblemResponse>>> (
 	string? destination,
 	string? checkIn,
 	string? checkOut,
 	RoomType? roomType,
-	IHotelSearchValidator validator,
-	IHotelAvailabilityService availabilityService,
+	HotelSearchService hotelSearchService,
 	CancellationToken cancellationToken) =>
 {
-	var request = new HotelSearchRequest(destination, checkIn, checkOut, roomType);
-	var validation = validator.Validate(request);
-
-	if (!validation.IsValid)
+	var validationErrors = ValidateStayCriteria(destination, checkIn, checkOut, out var parsedCheckIn, out var parsedCheckOut);
+	if (validationErrors.Count > 0)
 	{
-		return Results.BadRequest(ValidationProblemResponse.From(validation.Errors));
+		return TypedResults.BadRequest(ApiValidationProblemResponse.From(validationErrors));
 	}
 
-	var rooms = await availabilityService.SearchAsync(validation.Criteria, cancellationToken);
-	return Results.Ok(new HotelSearchResponse(validation.Criteria.Destination, validation.Criteria.CheckIn, validation.Criteria.CheckOut, rooms));
+	var request = new HotelSearchRequest(destination!.Trim(), parsedCheckIn, parsedCheckOut, roomType);
+	var rooms = await hotelSearchService.SearchAsync(request, cancellationToken);
+	return TypedResults.Ok(rooms);
 });
 
-app.MapPost("/hotels/reserve", async (
-	ReserveRoomRequest request,
-	IReservationValidator validator,
-	IReservationService reservationService,
-	CancellationToken cancellationToken) =>
+app.MapPost("/hotels/reserve", Results<Created<ReservationResponse>, BadRequest<ApiValidationProblemResponse>, UnprocessableEntity<ApiValidationProblemResponse>> (
+	ReservationRequest request,
+	DocumentValidationService documentValidationService,
+	DomainReservationService reservationService,
+	ConcurrentDictionary<string, ReservationResponse> reservations) =>
 {
-	var validation = validator.Validate(request);
-
-	if (validation.HasBadRequestErrors)
+	var validationErrors = ValidateReservationRequest(request);
+	if (validationErrors.Count > 0)
 	{
-		return Results.BadRequest(ValidationProblemResponse.From(validation.BadRequestErrors));
+		return TypedResults.BadRequest(ApiValidationProblemResponse.From(validationErrors));
 	}
 
-	if (validation.HasUnprocessableEntityErrors)
+	if (!documentValidationService.IsValidForDestination(request.Destination, request.DocumentType))
 	{
-		return Results.UnprocessableEntity(ValidationProblemResponse.From(validation.UnprocessableEntityErrors));
+		var requiredDocument = documentValidationService.GetRequiredDocumentType(request.Destination);
+		var errors = new[]
+		{
+			new ApiValidationError("documentType", $"{request.Destination} requires {requiredDocument}.")
+		};
+		return TypedResults.UnprocessableEntity(ApiValidationProblemResponse.From(errors));
 	}
 
-	var reservation = await reservationService.ReserveAsync(validation.Reservation, cancellationToken);
-	return Results.Created($"/hotels/reservation/{reservation.Reference}", reservation);
+	var reservation = reservationService.Reserve(request);
+	reservations[reservation.Reference] = reservation;
+	return TypedResults.Created($"/hotels/reservation/{reservation.Reference}", reservation);
 });
 
-app.MapGet("/hotels/reservation/{reference}", async (
+app.MapGet("/hotels/reservation/{reference}", Results<Ok<ReservationResponse>, NotFound> (
 	string reference,
-	IReservationService reservationService,
-	CancellationToken cancellationToken) =>
+	ConcurrentDictionary<string, ReservationResponse> reservations) =>
 {
-	var reservation = await reservationService.GetAsync(reference, cancellationToken);
-	return reservation is null ? Results.NotFound() : Results.Ok(reservation);
+	return reservations.TryGetValue(reference, out var reservation)
+		? TypedResults.Ok(reservation)
+		: TypedResults.NotFound();
 });
 
 app.Run();
+
+static List<ApiValidationError> ValidateStayCriteria(
+	string? destination,
+	string? checkIn,
+	string? checkOut,
+	out DateOnly parsedCheckIn,
+	out DateOnly parsedCheckOut)
+{
+	var errors = new List<ApiValidationError>();
+	parsedCheckIn = DateOnly.MinValue;
+	parsedCheckOut = DateOnly.MinValue;
+
+	if (string.IsNullOrWhiteSpace(destination))
+	{
+		errors.Add(new ApiValidationError("destination", "Destination is required."));
+	}
+
+	if (string.IsNullOrWhiteSpace(checkIn))
+	{
+		errors.Add(new ApiValidationError("checkIn", "Check-in date is required."));
+	}
+	else if (!DateOnly.TryParse(checkIn, out parsedCheckIn))
+	{
+		errors.Add(new ApiValidationError("checkIn", "Check-in date must be a valid ISO date."));
+	}
+
+	if (string.IsNullOrWhiteSpace(checkOut))
+	{
+		errors.Add(new ApiValidationError("checkOut", "Check-out date is required."));
+	}
+	else if (!DateOnly.TryParse(checkOut, out parsedCheckOut))
+	{
+		errors.Add(new ApiValidationError("checkOut", "Check-out date must be a valid ISO date."));
+	}
+
+	if (parsedCheckIn != DateOnly.MinValue && parsedCheckOut != DateOnly.MinValue && parsedCheckOut <= parsedCheckIn)
+	{
+		errors.Add(new ApiValidationError("checkOut", "Check-out date must be after check-in date."));
+	}
+
+	return errors;
+}
+
+static List<ApiValidationError> ValidateReservationRequest(ReservationRequest request)
+{
+	var errors = new List<ApiValidationError>();
+
+	if (string.IsNullOrWhiteSpace(request.Destination))
+	{
+		errors.Add(new ApiValidationError("destination", "Destination is required."));
+	}
+
+	if (request.CheckIn == DateOnly.MinValue)
+	{
+		errors.Add(new ApiValidationError("checkIn", "Check-in date is required."));
+	}
+
+	if (request.CheckOut == DateOnly.MinValue)
+	{
+		errors.Add(new ApiValidationError("checkOut", "Check-out date is required."));
+	}
+
+	if (request.CheckIn != DateOnly.MinValue && request.CheckOut != DateOnly.MinValue && request.CheckOut <= request.CheckIn)
+	{
+		errors.Add(new ApiValidationError("checkOut", "Check-out date must be after check-in date."));
+	}
+
+	return errors;
+}
 
 public partial class Program;

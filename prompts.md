@@ -262,6 +262,42 @@ Do not generate endpoints.
 
 Purpose: add business service classes for provider search orchestration, response normalization, reservation confirmation, and document validation without generating endpoints.
 
+## Prompt 8: Minimal API Endpoints Only
+
+```text
+Generate only the Minimal API endpoints.
+
+Implement
+
+GET /hotels/search
+
+POST /hotels/reserve
+
+GET /hotels/reservation/{reference}
+
+Requirements
+
+Return 400
+
+missing destination
+
+missing dates
+
+checkout before checkin
+
+Return 422
+
+invalid document
+
+Use TypedResults.
+
+Register DI.
+
+No frontend.
+```
+
+Purpose: wire the Minimal API endpoints to the existing domain services using dependency injection, typed results, validation status codes, and in-memory reservation lookup without frontend changes.
+
 ## Prompt Purposes
 
 | Prompt | Purpose | Result |
@@ -273,6 +309,7 @@ Purpose: add business service classes for provider search orchestration, respons
 | Domain layer only | Add domain contracts without implementation logic | `HotelStay.Api/Domain` |
 | Provider layer only | Add deterministic domain providers without services/endpoints | `HotelStay.Api/Domain/Providers` |
 | Business services only | Add provider search, reservation, and document services without endpoints | `HotelStay.Api/Domain/Services` |
+| Minimal API endpoints only | Wire API routes with TypedResults and DI | `HotelStay.Api/Program.cs` |
 | Provider architecture requirements | Preserve extensibility | `IHotelProvider`, provider mappers, DI registration |
 | Validation and testing requirements | Encode expected behavior | xUnit tests for mapping, price, filtering, date, document, and reference rules |
 
@@ -289,3 +326,4 @@ Purpose: add business service classes for provider search orchestration, respons
 - Keep domain contracts additive until the implementation layer is intentionally migrated to consume them.
 - Keep provider-layer additions deterministic and isolated from services, endpoints, and existing provider implementations unless a migration is explicitly requested.
 - Keep business service additions endpoint-free until API integration is explicitly requested.
+- Keep endpoint prompts focused on routing, validation, status codes, DI, and delegation; do not introduce frontend work unless explicitly requested.
