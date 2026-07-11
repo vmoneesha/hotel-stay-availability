@@ -422,6 +422,23 @@ Explain each test.
 
 Purpose: add focused domain-level xUnit coverage for document validation, hotel search normalization/filtering/ordering, price calculations, reservation confirmations, invalid document handling, and boundary scenarios using explicit Arrange / Act / Assert sections.
 
+## Prompt 13: Comprehensive Angular Unit Tests
+
+```text
+Continue working in the existing Angular application.
+
+Generate comprehensive Angular unit tests for the frontend.
+
+Use the project's existing testing framework.
+Cover components, services, reactive forms, business rules, HTTP behavior, and user interaction.
+Use Angular TestBed and HttpTestingController.
+Follow Arrange / Act / Assert.
+Cover positive, negative, and boundary scenarios.
+Do not modify production code unless a small change is required to improve testability.
+```
+
+Purpose: add deterministic Angular TestBed coverage for API calls, selection-store state, search form validation, hotel card interaction, reservation form document rules, search/reservation page workflows, and confirmation lookup behavior.
+
 
 ## Prompt Purposes
 
@@ -442,6 +459,7 @@ Purpose: add focused domain-level xUnit coverage for document validation, hotel 
 | International National ID UX | Make invalid international National ID selection guided and recoverable | `ReservationFormComponent` |
 | Confirmation action simplification | Remove duplicate finish-booking action | `ConfirmationComponent` template |
 | Comprehensive xUnit tests | Add broad domain service and provider behavior coverage | `HotelStay.Tests/DomainServiceTests.cs` |
+| Comprehensive Angular unit tests | Add frontend service, component, form, HTTP, and workflow coverage | `hotelstay-ui/src/app/**/*.spec.ts` |
 | Provider architecture requirements | Preserve extensibility | `IHotelProvider`, provider mappers, DI registration |
 | Validation and testing requirements | Encode expected behavior | xUnit tests for mapping, price, filtering, date, document, and reference rules |
 
