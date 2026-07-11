@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using HotelStay.Api.Domain.Dtos;
 using HotelStay.Api.Domain.Enums;
 using HotelStay.Api.Domain.Services;
+using HotelStay.Api.Validation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.OpenApi.Models;
 using ApiValidationError = HotelStay.Api.Dtos.ValidationError;
@@ -76,15 +77,16 @@ app.MapGet("/hotels/search", async Task<Results<Ok<IReadOnlyCollection<HotelRoom
 	string? checkOut,
 	RoomType? roomType,
 	HotelSearchService hotelSearchService,
+	HotelSearchCriteriaValidator validator,
 	CancellationToken cancellationToken) =>
 {
-	var validationErrors = ValidateStayCriteria(destination, checkIn, checkOut, out var parsedCheckIn, out var parsedCheckOut);
-	if (validationErrors.Count > 0)
+	var validation = validator.Validate(destination, checkIn, checkOut);
+	if (!validation.IsValid)
 	{
-		return TypedResults.BadRequest(ApiValidationProblemResponse.From(validationErrors));
+		return TypedResults.BadRequest(ApiValidationProblemResponse.From(validation.Errors));
 	}
 
-	var request = new HotelSearchRequest(destination!.Trim(), parsedCheckIn, parsedCheckOut, roomType);
+	var request = new HotelSearchRequest(destination!.Trim(), validation.CheckIn, validation.CheckOut, roomType);
 	var rooms = await hotelSearchService.SearchAsync(request, cancellationToken);
 	return TypedResults.Ok(rooms);
 })
@@ -104,11 +106,12 @@ app.MapGet("/hotels/search", async Task<Results<Ok<IReadOnlyCollection<HotelRoom
 
 app.MapPost("/hotels/reserve", Results<Created<ReservationResponse>, BadRequest<ApiValidationProblemResponse>, UnprocessableEntity<ApiValidationProblemResponse>> (
 	ReservationRequest request,
+	ReservationRequestValidator validator,
 	DocumentValidationService documentValidationService,
 	ReservationService reservationService,
 	ConcurrentDictionary<string, ReservationResponse> reservations) =>
 {
-	var validationErrors = ValidateReservationRequest(request);
+	var validationErrors = validator.Validate(request);
 	if (validationErrors.Count > 0)
 	{
 		return TypedResults.BadRequest(ApiValidationProblemResponse.From(validationErrors));
@@ -156,104 +159,5 @@ app.MapGet("/hotels/reservation/{reference}", Results<Ok<ReservationResponse>, N
 	});
 
 app.Run();
-
-static List<ApiValidationError> ValidateStayCriteria(
-	string? destination,
-	string? checkIn,
-	string? checkOut,
-	out DateOnly parsedCheckIn,
-	out DateOnly parsedCheckOut)
-{
-	var errors = new List<ApiValidationError>();
-	parsedCheckIn = DateOnly.MinValue;
-	parsedCheckOut = DateOnly.MinValue;
-
-	if (string.IsNullOrWhiteSpace(destination))
-	{
-		errors.Add(new ApiValidationError("destination", "Destination is required."));
-	}
-
-	if (string.IsNullOrWhiteSpace(checkIn))
-	{
-		errors.Add(new ApiValidationError("checkIn", "Check-in date is required."));
-	}
-	else if (!DateOnly.TryParse(checkIn, out parsedCheckIn))
-	{
-		errors.Add(new ApiValidationError("checkIn", "Check-in date must be a valid ISO date."));
-	}
-
-	if (string.IsNullOrWhiteSpace(checkOut))
-	{
-		errors.Add(new ApiValidationError("checkOut", "Check-out date is required."));
-	}
-	else if (!DateOnly.TryParse(checkOut, out parsedCheckOut))
-	{
-		errors.Add(new ApiValidationError("checkOut", "Check-out date must be a valid ISO date."));
-	}
-
-	if (parsedCheckIn != DateOnly.MinValue && parsedCheckOut != DateOnly.MinValue && parsedCheckOut <= parsedCheckIn)
-	{
-		errors.Add(new ApiValidationError("checkOut", "Check-out date must be after check-in date."));
-	}
-
-	return errors;
-}
-
-static List<ApiValidationError> ValidateReservationRequest(ReservationRequest request)
-{
-	var errors = new List<ApiValidationError>();
-
-	if (string.IsNullOrWhiteSpace(request.Destination))
-	{
-		errors.Add(new ApiValidationError("destination", "Destination is required."));
-	}
-
-	if (string.IsNullOrWhiteSpace(request.ProviderCode))
-	{
-		errors.Add(new ApiValidationError("providerCode", "Provider code is required."));
-	}
-
-	if (string.IsNullOrWhiteSpace(request.HotelId))
-	{
-		errors.Add(new ApiValidationError("hotelId", "Hotel id is required."));
-	}
-
-	if (string.IsNullOrWhiteSpace(request.RoomId))
-	{
-		errors.Add(new ApiValidationError("roomId", "Room id is required."));
-	}
-
-	if (string.IsNullOrWhiteSpace(request.GuestName))
-	{
-		errors.Add(new ApiValidationError("guestName", "Guest name is required."));
-	}
-
-	if (string.IsNullOrWhiteSpace(request.DocumentNumber))
-	{
-		errors.Add(new ApiValidationError("documentNumber", "Document number is required."));
-	}
-
-	if (request.PerNightPrice <= 0)
-	{
-		errors.Add(new ApiValidationError("perNightPrice", "Per-night price must be greater than zero."));
-	}
-
-	if (request.CheckIn == DateOnly.MinValue)
-	{
-		errors.Add(new ApiValidationError("checkIn", "Check-in date is required."));
-	}
-
-	if (request.CheckOut == DateOnly.MinValue)
-	{
-		errors.Add(new ApiValidationError("checkOut", "Check-out date is required."));
-	}
-
-	if (request.CheckIn != DateOnly.MinValue && request.CheckOut != DateOnly.MinValue && request.CheckOut <= request.CheckIn)
-	{
-		errors.Add(new ApiValidationError("checkOut", "Check-out date must be after check-in date."));
-	}
-
-	return errors;
-}
 
 public partial class Program;

@@ -1,5 +1,6 @@
 using HotelStay.Api.Domain.Dtos;
 using HotelStay.Api.Domain.Enums;
+using HotelStay.Api.Domain.Normalization;
 using HotelStay.Api.Domain.ProviderContracts;
 using HotelStay.Api.Domain.Providers;
 using HotelStay.Api.Domain.Services;
@@ -247,7 +248,9 @@ public sealed class DomainServiceTests
     }
 
     private static HotelSearchService CreateHotelSearchService() =>
-        new(new IHotelProvider[] { new PremierStaysProvider(), new BudgetNestsProvider() });
+        new(
+            new IHotelProvider[] { new PremierStaysProvider(), new BudgetNestsProvider() },
+            new IProviderRoomNormalizer[] { new PremierStaysRoomNormalizer(), new BudgetNestsRoomNormalizer() });
 
     private static HotelSearchRequest SearchRequest(string destination, DateOnly checkIn, DateOnly checkOut, RoomType? roomType) =>
         new(destination, checkIn, checkOut, roomType);

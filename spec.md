@@ -213,14 +213,14 @@ The frontend defaults international reservations to Passport and blocks invalid 
 - Backend xUnit unit tests for domain services and provider normalization.
 - Backend Minimal API integration tests for route binding, JSON contracts, validation status codes, reservation creation, and lookup.
 - Angular unit tests for services, state store, pages, and shared components.
-- Playwright e2e test for search to reservation to confirmation.
+- Playwright e2e tests for search to reservation to confirmation, invalid dates, and international document mismatch.
 
 ## Extension Points
 
 - Add a provider-specific source model under `Domain/ProviderModels`.
 - Implement `IHotelProvider` for the provider.
-- Add normalization for that provider's payload into `HotelRoomDto`.
-- Register the provider with dependency injection.
+- Implement `IProviderRoomNormalizer` for that provider's payload.
+- Register the provider and normalizer with dependency injection.
 - Add domain and endpoint tests for the new provider's behavior.
 
 ## Assumptions

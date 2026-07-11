@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Build and test solution
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: hotelstay-ui/package-lock.json
+
+      - name: Restore backend
+        run: dotnet restore HotelStay.sln
+
+      - name: Test backend
+        run: dotnet test HotelStay.Tests/HotelStay.Tests.csproj --no-restore --verbosity normal
+
+      - name: Install frontend dependencies
+        working-directory: hotelstay-ui
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: hotelstay-ui
+        run: npm run build
+
+      - name: Test frontend
+        working-directory: hotelstay-ui
+        run: npm test -- --watch=false --browsers=ChromeHeadless
+
+      - name: Install Playwright browser
+        working-directory: hotelstay-ui
+        run: npx playwright install --with-deps chrome
+
+      - name: Run Playwright e2e
+        working-directory: hotelstay-ui
+        run: npm run e2e

@@ -12,7 +12,7 @@ The solution uses a domain-oriented runtime path: Minimal API endpoints delegate
 
 One important refactoring was removing the duplicate backend layer that existed beside the active `Domain` layer. Keeping two provider/service/DTO stacks made the repository look more complex than it really was and weakened maintainability. After cleanup, dependency injection points to one backend path, and tests target the runtime behavior directly.
 
-The remaining architecture trade-off is in provider normalization. `HotelSearchService` currently knows how to normalize PremierStays and BudgetNests payloads. That is acceptable for a small case study, but a production-oriented version should move each provider normalizer behind a strategy or adapter interface so adding a third provider does not require editing the search orchestration service.
+Provider normalization now uses `IProviderRoomNormalizer` strategies. `HotelSearchService` orchestrates providers and delegates provider-specific mapping to normalizers, so adding a third provider is closer to an additive change.
 
 ## Implementation Reflections
 
@@ -26,7 +26,7 @@ The reservation workflow was tightened after review. Initially, the frontend val
 
 The backend test suite now includes both domain-level tests and Minimal API integration tests through `WebApplicationFactory<Program>`. The integration tests are valuable because they validate the actual route binding, JSON enum behavior, status codes, validation response shape, reservation creation, and lookup flow.
 
-Angular unit tests cover the services, store, pages, and shared components. The Playwright test adds one browser-level check for the most important user journey: search for a room, reserve it, and land on a confirmation page.
+Angular unit tests cover the services, store, pages, and shared components. The Playwright suite adds browser-level checks for the most important user journey plus invalid date and international document mismatch paths.
 
 The Playwright setup exposed a realistic integration issue: the test originally used `127.0.0.1:4200`, while the API CORS policy allowed `http://localhost:4200`. The fix was to align Playwright's base URL with the configured local development origin. This was a useful reminder that e2e tests catch environment assumptions that unit tests cannot.
 
@@ -51,8 +51,8 @@ AI also needed correction. Some generated documentation described an earlier arc
 | In-memory reservations | Fully offline and simple to run from a clean clone. | Reservations reset when the API restarts. |
 | Minimal API endpoints | Small, readable HTTP surface for the challenge. | `Program.cs` can grow if more endpoints are added. |
 | Domain provider stubs | Deterministic tests and no external dependencies. | Does not model provider latency, errors, retries, or partial failures. |
-| Direct provider normalization in `HotelSearchService` | Simple and easy to inspect for two providers. | A third provider should introduce a normalizer strategy to preserve open/closed design. |
-| One Playwright workflow | Proves the end-to-end happy path without heavy maintenance. | Does not replace broader accessibility, responsive, or negative-path browser testing. |
+| Provider normalizer strategies | Keeps provider-specific mapping additive and easier to test. | Adds a small amount of indirection for a two-provider case study. |
+| Focused Playwright coverage | Proves the happy path and key negative paths without heavy maintenance. | Does not replace broader accessibility or responsive browser testing. |
 
 ## What Went Well
 
@@ -61,17 +61,15 @@ AI also needed correction. Some generated documentation described an earlier arc
 - Client and server both enforce document rules.
 - Backend tests cover domain rules and HTTP endpoint behavior.
 - Frontend tests cover service, store, page, and component behavior.
-- Playwright verifies the primary user workflow.
+- Playwright verifies the primary user workflow and key negative paths.
 - Swagger makes the API easy to inspect during review.
 - Prompt history documents how AI was used across the delivery process.
 
 ## What I Would Improve Next
 
-- Introduce `IProviderRoomNormalizer` or a similar strategy interface so provider-specific normalization is fully additive.
-- Move endpoint validation helpers from `Program.cs` into dedicated validators if more request types are added.
-- Add a CI workflow that runs backend tests, Angular unit tests, frontend build, and Playwright e2e.
+- Expand provider normalizer tests if a third provider is added.
+- Add more request validators if more endpoint contracts are introduced.
 - Add a small accessibility pass with keyboard and screen-reader checks.
-- Add negative-path e2e tests for invalid dates and international National ID rejection.
 - Consider configuration-backed destination/document rules if business rules are expected to change.
 - Add structured logging and a health endpoint if this were prepared beyond the case-study scope.
 

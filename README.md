@@ -39,7 +39,7 @@ Angular UI
       -> Request validation
       -> HotelSearchService
         -> IHotelProvider implementations
-        -> Provider-specific payload normalization
+        -> IProviderRoomNormalizer strategies
       -> DocumentValidationService
       -> ReservationService
       -> In-memory reservation dictionary
@@ -53,11 +53,13 @@ Primary backend boundaries:
 - `Domain/ProviderContracts`: provider abstraction and provider result wrapper.
 - `Domain/Providers`: deterministic PremierStays and BudgetNests provider stubs.
 - `Domain/ProviderModels`: provider-specific source payload models isolated from API clients.
+- `Domain/Normalization`: provider-specific normalizer strategies that convert source payloads into `HotelRoomDto`.
 - `Domain/Services`: search orchestration, document validation, and reservation confirmation.
+- `Validation`: request validators for search and reservation inputs.
 - `Dtos/ValidationProblemResponse.cs`: shared field-level validation response contract.
 - `Documentation`: Swagger/OpenAPI examples.
 
-Adding a third provider should be additive: introduce a provider-specific source contract, implement `IHotelProvider`, add normalization logic for that provider, register it in dependency injection, and add tests.
+Adding a third provider should be additive: introduce a provider-specific source contract, implement `IHotelProvider`, add an `IProviderRoomNormalizer`, register both with dependency injection, and add tests.
 
 ## API
 
@@ -166,7 +168,7 @@ Prerequisites:
 
 - .NET 8 SDK
 - Node.js and npm
-- Chrome for the Playwright e2e test
+- Chrome for the Playwright e2e tests
 
 Restore and test backend:
 
@@ -215,7 +217,7 @@ npm test -- --watch=false --browsers=ChromeHeadless
 Pop-Location
 ```
 
-Playwright e2e test:
+Playwright e2e tests:
 
 ```powershell
 Push-Location hotelstay-ui
@@ -223,7 +225,7 @@ npm run e2e
 Pop-Location
 ```
 
-The Playwright configuration starts or reuses the API at `http://localhost:5000` and Angular at `http://localhost:4200`.
+The Playwright configuration starts or reuses the API at `http://localhost:5000` and Angular at `http://localhost:4200`. The e2e suite covers the happy reservation flow plus invalid date and international document mismatch paths.
 
 ## Repository Structure
 
