@@ -210,6 +210,58 @@ Do not generate services or endpoints.
 
 Purpose: add deterministic provider-layer implementations over the domain `IHotelProvider` contract without adding services, endpoints, or orchestration logic.
 
+## Prompt 7: Business Services Only
+
+```text
+Implement only the business services.
+
+Generate
+
+HotelSearchService
+
+ReservationService
+
+DocumentValidationService
+
+Requirements
+
+HotelSearchService
+
+- query all providers
+- normalize responses
+- filter unavailable rooms
+- calculate total stay price
+
+ReservationService
+
+- generate reservation reference
+- return confirmation
+
+DocumentValidationService
+
+Rules
+
+Domestic
+
+Hyderabad
+Bangalore
+Mumbai
+
+International
+
+London
+Dubai
+Singapore
+
+International requires Passport.
+
+Domestic accepts National ID.
+
+Do not generate endpoints.
+```
+
+Purpose: add business service classes for provider search orchestration, response normalization, reservation confirmation, and document validation without generating endpoints.
+
 ## Prompt Purposes
 
 | Prompt | Purpose | Result |
@@ -220,6 +272,7 @@ Purpose: add deterministic provider-layer implementations over the domain `IHote
 | Reusable prompt engineering assets | Create lifecycle prompt files | `.prompts/*.prompt.md` |
 | Domain layer only | Add domain contracts without implementation logic | `HotelStay.Api/Domain` |
 | Provider layer only | Add deterministic domain providers without services/endpoints | `HotelStay.Api/Domain/Providers` |
+| Business services only | Add provider search, reservation, and document services without endpoints | `HotelStay.Api/Domain/Services` |
 | Provider architecture requirements | Preserve extensibility | `IHotelProvider`, provider mappers, DI registration |
 | Validation and testing requirements | Encode expected behavior | xUnit tests for mapping, price, filtering, date, document, and reference rules |
 
@@ -235,3 +288,4 @@ Purpose: add deterministic provider-layer implementations over the domain `IHote
 - Keep reusable prompt files in `.prompts` synchronized with current architecture and technology choices.
 - Keep domain contracts additive until the implementation layer is intentionally migrated to consume them.
 - Keep provider-layer additions deterministic and isolated from services, endpoints, and existing provider implementations unless a migration is explicitly requested.
+- Keep business service additions endpoint-free until API integration is explicitly requested.
