@@ -58,6 +58,65 @@ Do not generate any other files or modify existing code.
 
 Purpose: create project-wide Copilot guidance so future AI-assisted changes preserve the offline architecture, provider extensibility, naming standards, testing expectations, and implementation quality bar.
 
+## Prompt 4: Reusable Prompt Engineering Assets
+
+```text
+You are acting as an AI Engineering Lead responsible for establishing reusable prompt engineering assets for this repository.
+
+The project already contains:
+
+- README.md
+- spec.md
+- prompts.md
+- reflection.md
+- .github/copilot-instructions.md
+
+Generate a new folder named:
+
+.prompts
+
+Inside it, create reusable GitHub Copilot Prompt Files (.prompt.md) that will be used throughout the project lifecycle.
+
+Create the following files:
+
+1. add-provider.prompt.md
+2. generate-endpoint.prompt.md
+3. generate-tests.prompt.md
+4. normalize-provider.prompt.md
+
+Each prompt file should follow a consistent structure with the following sections:
+
+# Purpose
+# Context
+# Inputs
+# Instructions
+# Expected Output
+# Validation Checklist
+
+Project Context
+
+This repository implements the Hotel Stay Availability case study using:
+
+- .NET 8 Minimal API
+- Angular
+- xUnit
+- Dependency Injection
+- SOLID Principles
+- Deterministic hotel providers
+- GitHub Copilot Enterprise
+
+The prompt files should be generic enough to be reusable but specific enough to enforce the project's architecture and coding conventions.
+
+Create prompt files for adding providers, generating endpoints, generating tests, and normalizing provider-specific responses into `HotelRoomDto`.
+
+Write all prompt files in clean Markdown.
+
+Do not modify any implementation files.
+Only create the reusable prompt files inside the .prompts folder.
+```
+
+Purpose: create reusable lifecycle prompt files for provider extension, endpoint generation, test generation, and provider normalization while preserving the solution architecture and offline deterministic constraints.
+
 ## Prompt Purposes
 
 | Prompt | Purpose | Result |
@@ -65,6 +124,7 @@ Purpose: create project-wide Copilot guidance so future AI-assisted changes pres
 | Documentation-only design phase | Define scope before code | README, spec, prompt log, reflection headings |
 | Full solution scaffold | Generate runnable solution | `HotelStay.sln`, `HotelStay.Api`, `HotelStay.Tests`, `hotelstay-ui` |
 | Repository-level Copilot instructions | Standardize future AI-assisted work | `.github/copilot-instructions.md` |
+| Reusable prompt engineering assets | Create lifecycle prompt files | `.prompts/*.prompt.md` |
 | Provider architecture requirements | Preserve extensibility | `IHotelProvider`, provider mappers, DI registration |
 | Validation and testing requirements | Encode expected behavior | xUnit tests for mapping, price, filtering, date, document, and reference rules |
 
@@ -77,3 +137,4 @@ Purpose: create project-wide Copilot guidance so future AI-assisted changes pres
 - Ask for review before adding persistence, authentication, payment, or cloud deployment.
 - Keep offline determinism unless a future prompt explicitly changes that constraint.
 - Update `.github/copilot-instructions.md` whenever architectural constraints or coding conventions materially change.
+- Keep reusable prompt files in `.prompts` synchronized with current architecture and technology choices.
