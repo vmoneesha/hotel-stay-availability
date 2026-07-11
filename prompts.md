@@ -454,6 +454,20 @@ The run-application prompt must cover backend startup, frontend startup, Swagger
 
 Purpose: add reusable operational prompts for running the full solution, executing backend/frontend tests, and validating builds, runtime behavior, API/frontend integration, and booking workflows before handoff.
 
+## Prompt 15: Swagger/OpenAPI Documentation
+
+```text
+Continue working in the existing Hotel Stay Availability .NET 8 Minimal API project.
+
+Enable Swagger/OpenAPI support for the API while following .NET 8 best practices.
+
+Register all required Swagger/OpenAPI services, configure middleware in Program.cs, enable Swagger UI for Development, document all Minimal API endpoints, group related endpoints under Hotels, add summaries and descriptions, include request and response schemas, document validation responses, configure launchSettings.json to open Swagger by default, and add meaningful examples for requests, successful responses, and validation errors.
+
+Do not modify business logic or endpoint behavior.
+```
+
+Purpose: enable professional Swagger/OpenAPI documentation for the Minimal API with Development-only Swagger UI, Hotels endpoint grouping, summaries, descriptions, schemas, examples, validation response metadata, and launch settings that open Swagger by default.
+
 
 ## Prompt Purposes
 
@@ -476,6 +490,7 @@ Purpose: add reusable operational prompts for running the full solution, executi
 | Comprehensive xUnit tests | Add broad domain service and provider behavior coverage | `HotelStay.Tests/DomainServiceTests.cs` |
 | Comprehensive Angular unit tests | Add frontend service, component, form, HTTP, and workflow coverage | `hotelstay-ui/src/app/**/*.spec.ts` |
 | Runtime, test, and validation prompt files | Add reusable operational prompt assets | `.prompts/run-application.prompt.md`, `.prompts/run-tests.prompt.md`, `.prompts/validate-solution.prompt.md` |
+| Swagger/OpenAPI documentation | Add documented Swagger UI and OpenAPI metadata | `HotelStay.Api/Program.cs`, `HotelStay.Api/HotelStay.Api.csproj`, `HotelStay.Api/Properties/launchSettings.json` |
 | Provider architecture requirements | Preserve extensibility | `IHotelProvider`, provider mappers, DI registration |
 | Validation and testing requirements | Encode expected behavior | xUnit tests for mapping, price, filtering, date, document, and reference rules |
 
@@ -500,3 +515,4 @@ Purpose: add reusable operational prompts for running the full solution, executi
 - Keep confirmation actions focused; avoid duplicate navigation choices that lead to the same route.
 - Keep backend behavior covered with focused xUnit tests that use real deterministic providers and services when practical.
 - Keep operational prompt files focused on running, testing, and validating the existing solution without changing working functionality.
+- Keep Swagger/OpenAPI updates documentation-only for API behavior: add metadata, examples, and launch configuration without changing endpoint business logic.
