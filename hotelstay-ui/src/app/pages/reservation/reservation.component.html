@@ -1,0 +1,53 @@
+@if (selectedRoom$ | async; as selected) {
+  <section class="page-grid">
+    <article class="room-card selected-room">
+      <div>
+        <span class="badge">{{ selected.room.providerBadge }}</span>
+        <h1>{{ selected.room.hotelName }}</h1>
+        <p>{{ selected.room.destination }} · {{ selected.room.roomType }}</p>
+        <p>{{ selected.checkIn }} to {{ selected.checkOut }}</p>
+      </div>
+      <div class="price-box">
+        <strong>{{ selected.room.totalStayPrice | currency:'INR':'symbol-narrow' }}</strong>
+        <span>{{ selected.room.perNightPrice | currency:'INR':'symbol-narrow' }} per night</span>
+      </div>
+    </article>
+
+    <div class="panel">
+      <p class="eyebrow">Reservation</p>
+      <h2>Confirm guest details</h2>
+      <form [formGroup]="form" (ngSubmit)="reserve()" class="search-form">
+        <label>
+          Guest name
+          <input type="text" formControlName="guestName">
+        </label>
+        <label>
+          Document type
+          <select formControlName="documentType">
+            @for (documentType of documentTypes; track documentType) {
+              <option [value]="documentType">{{ labelFor(documentType) }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Document number
+          <input type="text" formControlName="documentNumber">
+        </label>
+        @if (validationErrors.length > 0) {
+          <div class="alert" role="alert">
+            @for (error of validationErrors; track error) {
+              <p>{{ error }}</p>
+            }
+          </div>
+        }
+        <button type="submit" [disabled]="loading">{{ loading ? 'Confirming...' : 'Confirm reservation' }}</button>
+      </form>
+    </div>
+  </section>
+} @else {
+  <section class="panel state-panel">
+    <h1>No room selected</h1>
+    <p>Choose an available room before starting a reservation.</p>
+    <a routerLink="/search" class="text-link">Back to search</a>
+  </section>
+}
