@@ -21,7 +21,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IReservationStore, InMemoryReservationStore>();
         services.AddSingleton<HotelSearchCriteriaValidator>();
         services.AddSingleton<ReservationRequestValidator>();
-        services.AddSingleton<TimeProvider, DeterministicReservationTimeProvider>();
+        services.AddSingleton(TimeProvider.System);
         return services;
     }
 }

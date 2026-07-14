@@ -19,7 +19,7 @@ No external APIs, credentials, databases, authentication, cloud services, or non
 | Backend tests | `dotnet test HotelStay.Tests\HotelStay.Tests.csproj` |
 | Angular tests | `Push-Location hotelstay-ui; npm test -- --watch=false --browsers=ChromeHeadless; Pop-Location` |
 | Playwright tests | `Push-Location hotelstay-ui; npm run e2e; Pop-Location` |
-| Reviewer notes | Offline deterministic providers, deterministic reservation clock, in-memory storage by scope, no secrets, no database, no external APIs |
+| Reviewer notes | Offline deterministic providers, runtime UTC reservation timestamps, in-memory storage by scope, no secrets, no database, no external APIs |
 
 Sample reservation payload:
 
@@ -91,7 +91,7 @@ Primary backend boundaries:
 - `HotelStay.Domain/Domain/Providers`: deterministic PremierStays and BudgetNests provider stubs.
 - `HotelStay.Domain/Domain/ProviderModels`: provider-specific source payload models isolated from API clients.
 - `HotelStay.Domain/Domain/Normalization`: provider-specific normalizer strategies that convert source payloads into `HotelRoomDto`.
-- `HotelStay.Domain/Domain/Services`: search orchestration, document validation, deterministic reservation clock, and reservation confirmation.
+- `HotelStay.Domain/Domain/Services`: search orchestration, document validation, UTC reservation timestamping, and reservation confirmation.
 - `HotelStay.Domain/Domain/Stores`: reservation persistence abstraction and offline in-memory implementation.
 - `HotelStay.Api/Validation`: request validators for search and reservation inputs.
 - `HotelStay.Api/Dtos/ValidationProblemResponse.cs`: shared field-level validation response contract.

@@ -127,7 +127,7 @@ app.MapPost("/hotels/reserve", Results<Created<ReservationResponse>, BadRequest<
 })
 	.WithTags("Hotels")
 	.WithSummary("Reserve a selected hotel room")
-	.WithDescription("Creates a deterministic in-memory reservation for a selected room after validating stay dates and destination-specific document rules.")
+	.WithDescription("Creates an in-memory reservation for a selected room after validating stay dates and destination-specific document rules.")
 	.Accepts<ReservationRequest>("application/json")
 	.Produces<ReservationResponse>(StatusCodes.Status201Created)
 	.Produces<ApiValidationProblemResponse>(StatusCodes.Status400BadRequest)
