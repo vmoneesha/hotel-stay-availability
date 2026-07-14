@@ -114,7 +114,7 @@ internal sealed class HotelStayExamplesOperationFilter : IOperationFilter
 		["perNightPrice"] = new OpenApiDouble(2900),
 		["totalStayPrice"] = new OpenApiDouble(5800),
 		["nights"] = new OpenApiInteger(2),
-		["createdAtUtc"] = new OpenApiString("2026-07-11T00:00:00+00:00")
+		["createdAtUtc"] = new OpenApiString("2026-08-01T10:15:30+00:00")
 	};
 
 	private static OpenApiObject ValidationExample(string field, string message) => new()

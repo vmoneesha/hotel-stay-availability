@@ -164,6 +164,7 @@ Request body:
 ```
 
 Successful responses use HTTP 201 and include a `Location` header for `/hotels/reservation/{reference}`.
+The `createdAtUtc` value shown below is an example runtime UTC timestamp.
 
 ```json
 {
@@ -180,7 +181,7 @@ Successful responses use HTTP 201 and include a `Location` header for `/hotels/r
   "perNightPrice": 310,
   "totalStayPrice": 930,
   "nights": 3,
-  "createdAtUtc": "2026-07-11T00:00:00+00:00"
+  "createdAtUtc": "2026-08-01T10:15:30+00:00"
 }
 ```
 
