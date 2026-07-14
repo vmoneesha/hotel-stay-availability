@@ -1,14 +1,14 @@
-@if (loading) {
+@if (loading()) {
   <app-loading-spinner label="Loading reservation confirmation..." />
-} @else if (error) {
+} @else if (error()) {
   <section class="confirmation-page">
-    <app-empty-state [title]="error" message="Search again or check the reservation reference." />
+    <app-empty-state [title]="error()" message="Search again or check the reservation reference." />
     <a mat-stroked-button routerLink="/search" class="secondary-button">Back to Search</a>
   </section>
-} @else if (reservation) {
+} @else if (reservation(); as reservation) {
   <section class="confirmation-page">
     <app-booking-progress [currentStep]="3" />
-    <app-confirmation-card [reservation]="reservation" [room]="room" />
+    <app-confirmation-card [reservation]="reservation" [room]="room()" />
     <div class="confirmation-actions" aria-label="Confirmation actions">
       <a mat-flat-button routerLink="/search" class="primary-button">Book Another Hotel</a>
     </div>

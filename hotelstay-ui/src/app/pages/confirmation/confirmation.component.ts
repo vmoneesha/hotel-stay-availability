@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HotelRoomDto, ReservationDto } from '../../models/hotel.models';
@@ -15,34 +15,37 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
   templateUrl: './confirmation.component.html',
   styleUrl: './confirmation.component.scss'
 })
-export class ConfirmationComponent implements OnInit {
-  reservation: ReservationDto | null = null;
-  room: HotelRoomDto | null = null;
-  loading = true;
-  error = '';
+export class ConfirmationComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly hotelApi = inject(HotelApiService);
+  private readonly selectionStore = inject(HotelSelectionStore);
 
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly hotelApi: HotelApiService,
-    private readonly selectionStore: HotelSelectionStore) {}
+  readonly reservation = signal<ReservationDto | null>(null);
+  readonly room = signal<HotelRoomDto | null>(null);
+  readonly loading = signal(true);
+  readonly error = signal('');
 
-  ngOnInit(): void {
+  constructor() {
+    this.loadReservation();
+  }
+
+  private loadReservation(): void {
     const reference = this.route.snapshot.paramMap.get('reference');
     if (!reference) {
-      this.loading = false;
-      this.error = 'Reservation reference is missing.';
+      this.loading.set(false);
+      this.error.set('Reservation reference is missing.');
       return;
     }
 
     this.hotelApi.getReservation(reference).subscribe({
       next: reservation => {
-        this.reservation = reservation;
-        this.room = this.selectionStore.confirmedRoom(reservation.reference);
-        this.loading = false;
+        this.reservation.set(reservation);
+        this.room.set(this.selectionStore.confirmedRoom(reservation.reference));
+        this.loading.set(false);
       },
       error: () => {
-        this.loading = false;
-        this.error = 'Reservation was not found.';
+        this.loading.set(false);
+        this.error.set('Reservation was not found.');
       }
     });
   }

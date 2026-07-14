@@ -71,7 +71,7 @@ describe('HotelApiService', () => {
     service.search('London', '2026-08-10', '2026-08-12', 'Deluxe').subscribe(response => rooms = response.rooms);
 
     const request = httpMock.expectOne(req => req.url === `${environment.apiBaseUrl}/hotels/search`);
-    request.flush({ destination: 'London', checkIn: '2026-08-10', checkOut: '2026-08-12', rooms: [room] });
+  request.flush([room]);
 
     // Assert
     expect(request.request.params.get('roomType')).toBe('Deluxe');

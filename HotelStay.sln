@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelStay.Api", "HotelStay.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelStay.Tests", "HotelStay.Tests\HotelStay.Tests.csproj", "{33298EC5-E75C-4B3C-B5AD-62B9C3C500E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelStay.Domain", "HotelStay.Domain\HotelStay.Domain.csproj", "{9A5F7F3B-1BEF-4B5A-BCC7-86E851525AAC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,18 @@ Global
 		{33298EC5-E75C-4B3C-B5AD-62B9C3C500E0}.Release|x64.Build.0 = Release|Any CPU
 		{33298EC5-E75C-4B3C-B5AD-62B9C3C500E0}.Release|x86.ActiveCfg = Release|Any CPU
 		{33298EC5-E75C-4B3C-B5AD-62B9C3C500E0}.Release|x86.Build.0 = Release|Any CPU
+		{9A5F7F3B-1BEF-4B5A-BCC7-86E851525AAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A5F7F3B-1BEF-4B5A-BCC7-86E851525AAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A5F7F3B-1BEF-4B5A-BCC7-86E851525AAC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9A5F7F3B-1BEF-4B5A-BCC7-86E851525AAC}.Debug|x64.Build.0 = Debug|Any CPU
+		{9A5F7F3B-1BEF-4B5A-BCC7-86E851525AAC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9A5F7F3B-1BEF-4B5A-BCC7-86E851525AAC}.Debug|x86.Build.0 = Debug|Any CPU
+		{9A5F7F3B-1BEF-4B5A-BCC7-86E851525AAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A5F7F3B-1BEF-4B5A-BCC7-86E851525AAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A5F7F3B-1BEF-4B5A-BCC7-86E851525AAC}.Release|x64.ActiveCfg = Release|Any CPU
+		{9A5F7F3B-1BEF-4B5A-BCC7-86E851525AAC}.Release|x64.Build.0 = Release|Any CPU
+		{9A5F7F3B-1BEF-4B5A-BCC7-86E851525AAC}.Release|x86.ActiveCfg = Release|Any CPU
+		{9A5F7F3B-1BEF-4B5A-BCC7-86E851525AAC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

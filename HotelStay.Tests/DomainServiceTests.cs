@@ -1,14 +1,17 @@
-using HotelStay.Api.Domain.Dtos;
-using HotelStay.Api.Domain.Enums;
-using HotelStay.Api.Domain.Normalization;
-using HotelStay.Api.Domain.ProviderContracts;
-using HotelStay.Api.Domain.Providers;
-using HotelStay.Api.Domain.Services;
+using HotelStay.Domain.Dtos;
+using HotelStay.Domain.Enums;
+using HotelStay.Domain.Normalization;
+using HotelStay.Domain.ProviderContracts;
+using HotelStay.Domain.Providers;
+using HotelStay.Domain.Services;
+using HotelStay.Domain.Stores;
 
 namespace HotelStay.Tests;
 
 public sealed class DomainServiceTests
 {
+    private static readonly DateTimeOffset FixedCreatedAtUtc = new(2026, 7, 11, 0, 0, 0, TimeSpan.Zero);
+
     [Theory]
     [InlineData("London")]
     [InlineData("Dubai")]
@@ -188,7 +191,7 @@ public sealed class DomainServiceTests
     public void ReservationService_ReturnsConfirmationWithDeterministicReferenceAndPrice()
     {
         // Arrange
-        var service = new ReservationService(new DocumentValidationService());
+        var service = CreateReservationService();
         var request = ReservationRequest("Hyderabad", new DateOnly(2026, 8, 10), new DateOnly(2026, 8, 13), DocumentType.Passport, 2900m);
 
         // Act
@@ -200,14 +203,14 @@ public sealed class DomainServiceTests
         Assert.Equal(DocumentType.Passport, reservation.DocumentType);
         Assert.Equal(3, reservation.Nights);
         Assert.Equal(8700m, reservation.TotalStayPrice);
-        Assert.Equal(new DateTimeOffset(2026, 7, 11, 0, 0, 0, TimeSpan.Zero), reservation.CreatedAtUtc);
+        Assert.Equal(FixedCreatedAtUtc, reservation.CreatedAtUtc);
     }
 
     [Fact]
     public void ReservationService_IncrementsReservationReferencesSequentially()
     {
         // Arrange
-        var service = new ReservationService(new DocumentValidationService());
+        var service = CreateReservationService();
 
         // Act
         var first = service.Reserve(ReservationRequest("Bangalore", new DateOnly(2026, 8, 10), new DateOnly(2026, 8, 11), DocumentType.NationalId, 3100m));
@@ -222,13 +225,14 @@ public sealed class DomainServiceTests
     public void ReservationService_RejectsInvalidInternationalDocument()
     {
         // Arrange
-        var service = new ReservationService(new DocumentValidationService());
+        var service = CreateReservationService();
         var request = ReservationRequest("London", new DateOnly(2026, 8, 10), new DateOnly(2026, 8, 12), DocumentType.NationalId, 185m);
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => service.Reserve(request));
+        var exception = Assert.Throws<ReservationDocumentValidationException>(() => service.Reserve(request));
 
         // Assert
+        Assert.Equal("documentType", exception.Field);
         Assert.Contains("London requires a valid Passport", exception.Message);
     }
 
@@ -236,7 +240,7 @@ public sealed class DomainServiceTests
     public void ReservationService_CalculatesSingleNightBoundaryPrice()
     {
         // Arrange
-        var service = new ReservationService(new DocumentValidationService());
+        var service = CreateReservationService();
         var request = ReservationRequest("Singapore", new DateOnly(2026, 8, 10), new DateOnly(2026, 8, 11), DocumentType.Passport, 240m);
 
         // Act
@@ -247,10 +251,29 @@ public sealed class DomainServiceTests
         Assert.Equal(240m, reservation.TotalStayPrice);
     }
 
+    [Fact]
+    public void ReservationService_StoresReservationForReferenceLookup()
+    {
+        // Arrange
+        var store = new InMemoryReservationStore();
+        var service = CreateReservationService(store);
+        var request = ReservationRequest("Hyderabad", new DateOnly(2026, 8, 10), new DateOnly(2026, 8, 11), DocumentType.NationalId, 2900m);
+
+        // Act
+        var reservation = service.Reserve(request);
+        var found = service.FindByReference(reservation.Reference);
+
+        // Assert
+        Assert.Equal(reservation, found);
+    }
+
     private static HotelSearchService CreateHotelSearchService() =>
         new(
             new IHotelProvider[] { new PremierStaysProvider(), new BudgetNestsProvider() },
             new IProviderRoomNormalizer[] { new PremierStaysRoomNormalizer(), new BudgetNestsRoomNormalizer() });
+
+    private static ReservationService CreateReservationService(IReservationStore? store = null) =>
+        new(new DocumentValidationService(), store ?? new InMemoryReservationStore(), new FixedTimeProvider(FixedCreatedAtUtc));
 
     private static HotelSearchRequest SearchRequest(string destination, DateOnly checkIn, DateOnly checkOut, RoomType? roomType) =>
         new(destination, checkIn, checkOut, roomType);
@@ -273,4 +296,9 @@ public sealed class DomainServiceTests
             documentType,
             documentType == DocumentType.Passport ? "P1234567" : "N1234567",
             perNightPrice);
+
+    private sealed class FixedTimeProvider(DateTimeOffset utcNow) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => utcNow;
+    }
 }

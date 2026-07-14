@@ -217,7 +217,7 @@ The frontend defaults international reservations to Passport and blocks invalid 
 
 ## Extension Points
 
-- Add a provider-specific source model under `Domain/ProviderModels`.
+- Add a provider-specific source model under `HotelStay.Domain/Domain/ProviderModels`.
 - Implement `IHotelProvider` for the provider.
 - Implement `IProviderRoomNormalizer` for that provider's payload.
 - Register the provider and normalizer with dependency injection.

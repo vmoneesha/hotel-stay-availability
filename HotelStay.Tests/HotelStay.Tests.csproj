@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HotelStay.Domain\HotelStay.Domain.csproj" />
     <ProjectReference Include="..\HotelStay.Api\HotelStay.Api.csproj" />
   </ItemGroup>
 

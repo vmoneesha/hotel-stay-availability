@@ -1,4 +1,4 @@
-using HotelStay.Api.Domain.Dtos;
+using HotelStay.Domain.Dtos;
 using HotelStay.Api.Dtos;
 
 namespace HotelStay.Api.Validation;

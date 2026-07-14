@@ -1,14 +1,13 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HotelSearchResponse, ReservationDto, ReserveRoomRequest, RoomType } from '../models/hotel.models';
+import { HotelRoomDto, HotelSearchResponse, ReservationDto, ReserveRoomRequest, RoomType } from '../models/hotel.models';
 
 @Injectable({ providedIn: 'root' })
 export class HotelApiService {
+  private readonly http = inject(HttpClient);
   private readonly baseUrl = environment.apiBaseUrl;
-
-  constructor(private readonly http: HttpClient) {}
 
   search(destination: string, checkIn: string, checkOut: string, roomType: RoomType | ''): Observable<HotelSearchResponse> {
     let params = new HttpParams()
@@ -20,10 +19,8 @@ export class HotelApiService {
       params = params.set('roomType', roomType);
     }
 
-    return this.http.get<HotelSearchResponse | HotelSearchResponse['rooms']>(`${this.baseUrl}/hotels/search`, { params })
-      .pipe(map(response => Array.isArray(response)
-        ? { destination, checkIn, checkOut, rooms: response }
-        : response));
+    return this.http.get<HotelRoomDto[]>(`${this.baseUrl}/hotels/search`, { params })
+      .pipe(map(rooms => ({ destination, checkIn, checkOut, rooms })));
   }
 
   reserve(request: ReserveRoomRequest): Observable<ReservationDto> {

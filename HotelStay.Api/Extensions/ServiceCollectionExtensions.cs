@@ -1,9 +1,8 @@
-using System.Collections.Concurrent;
-using HotelStay.Api.Domain.Dtos;
-using HotelStay.Api.Domain.Normalization;
-using HotelStay.Api.Domain.ProviderContracts;
-using HotelStay.Api.Domain.Providers;
-using HotelStay.Api.Domain.Services;
+using HotelStay.Domain.Normalization;
+using HotelStay.Domain.ProviderContracts;
+using HotelStay.Domain.Providers;
+using HotelStay.Domain.Services;
+using HotelStay.Domain.Stores;
 using HotelStay.Api.Validation;
 
 namespace HotelStay.Api.Extensions;
@@ -19,9 +18,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<HotelSearchService>();
         services.AddSingleton<DocumentValidationService>();
         services.AddSingleton<ReservationService>();
+        services.AddSingleton<IReservationStore, InMemoryReservationStore>();
         services.AddSingleton<HotelSearchCriteriaValidator>();
         services.AddSingleton<ReservationRequestValidator>();
-        services.AddSingleton<ConcurrentDictionary<string, ReservationResponse>>();
+        services.AddSingleton<TimeProvider, DeterministicReservationTimeProvider>();
         return services;
     }
 }

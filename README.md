@@ -4,6 +4,41 @@ Hotel Stay Availability is an offline, deterministic hotel booking application f
 
 No external APIs, credentials, databases, authentication, cloud services, or nondeterministic data are required.
 
+## Quick Reference
+
+| Topic | Details |
+| --- | --- |
+| Domestic destinations | `Hyderabad`, `Bangalore`, `Mumbai` |
+| International destinations | `London`, `Dubai`, `Singapore` |
+| Accepted documents | Domestic: `NationalId` or `Passport`; international: `Passport` only |
+| API URL | `http://localhost:5000` |
+| Swagger URL | `http://localhost:5000/swagger` |
+| Angular URL | `http://localhost:4200` |
+| Run API | `dotnet run --project HotelStay.Api\HotelStay.Api.csproj --launch-profile http` |
+| Run UI | `Push-Location hotelstay-ui; npm start; Pop-Location` |
+| Backend tests | `dotnet test HotelStay.Tests\HotelStay.Tests.csproj` |
+| Angular tests | `Push-Location hotelstay-ui; npm test -- --watch=false --browsers=ChromeHeadless; Pop-Location` |
+| Playwright tests | `Push-Location hotelstay-ui; npm run e2e; Pop-Location` |
+| Reviewer notes | Offline deterministic providers, deterministic reservation clock, in-memory storage by scope, no secrets, no database, no external APIs |
+
+Sample reservation payload:
+
+```json
+{
+  "destination": "London",
+  "checkIn": "2026-08-10",
+  "checkOut": "2026-08-13",
+  "providerCode": "PremierStays",
+  "hotelId": "PS-LON-010",
+  "roomId": "PS-LON-STE",
+  "roomType": "Suite",
+  "guestName": "Asha Rao",
+  "documentType": "Passport",
+  "documentNumber": "P1234567",
+  "perNightPrice": 310
+}
+```
+
 ## Requirements Covered
 
 - Search hotel rooms by destination, check-in date, check-out date, and optional room type.
@@ -37,27 +72,30 @@ Angular UI
   -> HotelApiService
     -> .NET Minimal API endpoints
       -> Request validation
-      -> HotelSearchService
-        -> IHotelProvider implementations
-        -> IProviderRoomNormalizer strategies
-      -> DocumentValidationService
-      -> ReservationService
-      -> In-memory reservation dictionary
+      -> HotelStay.Domain
+        -> HotelSearchService
+          -> IHotelProvider implementations
+          -> IProviderRoomNormalizer strategies
+        -> DocumentValidationService
+        -> ReservationService
+        -> IReservationStore
+          -> InMemoryReservationStore
 ```
 
 Primary backend boundaries:
 
-- `Program.cs`: Minimal API routing, HTTP status-code selection, Swagger metadata, and thin request validation.
-- `Domain/Dtos`: public search, room, reservation, and normalized response contracts.
-- `Domain/Enums`: stable JSON enum values for room type, document type, and cancellation policy.
-- `Domain/ProviderContracts`: provider abstraction and provider result wrapper.
-- `Domain/Providers`: deterministic PremierStays and BudgetNests provider stubs.
-- `Domain/ProviderModels`: provider-specific source payload models isolated from API clients.
-- `Domain/Normalization`: provider-specific normalizer strategies that convert source payloads into `HotelRoomDto`.
-- `Domain/Services`: search orchestration, document validation, and reservation confirmation.
-- `Validation`: request validators for search and reservation inputs.
-- `Dtos/ValidationProblemResponse.cs`: shared field-level validation response contract.
-- `Documentation`: Swagger/OpenAPI examples.
+- `HotelStay.Api/Program.cs`: Minimal API routing, HTTP status-code selection, Swagger metadata, and thin request validation.
+- `HotelStay.Domain/Domain/Dtos`: public search, room, reservation, and normalized response contracts.
+- `HotelStay.Domain/Domain/Enums`: stable JSON enum values for room type, document type, and cancellation policy.
+- `HotelStay.Domain/Domain/ProviderContracts`: provider abstraction and provider result wrapper.
+- `HotelStay.Domain/Domain/Providers`: deterministic PremierStays and BudgetNests provider stubs.
+- `HotelStay.Domain/Domain/ProviderModels`: provider-specific source payload models isolated from API clients.
+- `HotelStay.Domain/Domain/Normalization`: provider-specific normalizer strategies that convert source payloads into `HotelRoomDto`.
+- `HotelStay.Domain/Domain/Services`: search orchestration, document validation, deterministic reservation clock, and reservation confirmation.
+- `HotelStay.Domain/Domain/Stores`: reservation persistence abstraction and offline in-memory implementation.
+- `HotelStay.Api/Validation`: request validators for search and reservation inputs.
+- `HotelStay.Api/Dtos/ValidationProblemResponse.cs`: shared field-level validation response contract.
+- `HotelStay.Api/Documentation`: Swagger/OpenAPI examples.
 
 Adding a third provider should be additive: introduce a provider-specific source contract, implement `IHotelProvider`, add an `IProviderRoomNormalizer`, register both with dependency injection, and add tests.
 
@@ -234,6 +272,7 @@ hotel-stay-availability/
   .github/copilot-instructions.md
   .prompts/
   HotelStay.Api/
+  HotelStay.Domain/
   HotelStay.Tests/
   hotelstay-ui/
   README.md

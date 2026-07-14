@@ -36,8 +36,6 @@ describe('ConfirmationComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ConfirmationComponent);
-    component = fixture.componentInstance;
     selectionStore = TestBed.inject(HotelSelectionStore);
   });
 
@@ -49,13 +47,14 @@ describe('ConfirmationComponent', () => {
     hotelApi.getReservation.and.returnValue(of(confirmation));
 
     // Act
+    createComponent();
     fixture.detectChanges();
 
     // Assert
     expect(hotelApi.getReservation).toHaveBeenCalledOnceWith('HS-000010');
-    expect(component.reservation).toEqual(confirmation);
-    expect(component.room).toEqual(selectedRoom);
-    expect(component.loading).toBeFalse();
+    expect(component.reservation()).toEqual(confirmation);
+    expect(component.room()).toEqual(selectedRoom);
+    expect(component.loading()).toBeFalse();
   });
 
   it('shows an error when the reservation reference is missing', () => {
@@ -63,11 +62,12 @@ describe('ConfirmationComponent', () => {
     routeReference = null;
 
     // Act
+    createComponent();
     fixture.detectChanges();
 
     // Assert
-    expect(component.loading).toBeFalse();
-    expect(component.error).toBe('Reservation reference is missing.');
+    expect(component.loading()).toBeFalse();
+    expect(component.error()).toBe('Reservation reference is missing.');
     expect(hotelApi.getReservation).not.toHaveBeenCalled();
   });
 
@@ -76,13 +76,19 @@ describe('ConfirmationComponent', () => {
     hotelApi.getReservation.and.returnValue(throwError(() => ({ status: 404 })));
 
     // Act
+    createComponent();
     fixture.detectChanges();
 
     // Assert
-    expect(component.loading).toBeFalse();
-    expect(component.error).toBe('Reservation was not found.');
-    expect(component.reservation).toBeNull();
+    expect(component.loading()).toBeFalse();
+    expect(component.error()).toBe('Reservation was not found.');
+    expect(component.reservation()).toBeNull();
   });
+
+  function createComponent(): void {
+    fixture = TestBed.createComponent(ConfirmationComponent);
+    component = fixture.componentInstance;
+  }
 
   function reservation(reference: string): ReservationDto {
     return {

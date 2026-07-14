@@ -1,10 +1,9 @@
-using System.Collections.Concurrent;
 using HotelStay.Api.Documentation;
 using HotelStay.Api.Extensions;
 using System.Text.Json.Serialization;
-using HotelStay.Api.Domain.Dtos;
-using HotelStay.Api.Domain.Enums;
-using HotelStay.Api.Domain.Services;
+using HotelStay.Domain.Dtos;
+using HotelStay.Domain.Enums;
+using HotelStay.Domain.Services;
 using HotelStay.Api.Validation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.OpenApi.Models;
@@ -107,9 +106,7 @@ app.MapGet("/hotels/search", async Task<Results<Ok<IReadOnlyCollection<HotelRoom
 app.MapPost("/hotels/reserve", Results<Created<ReservationResponse>, BadRequest<ApiValidationProblemResponse>, UnprocessableEntity<ApiValidationProblemResponse>> (
 	ReservationRequest request,
 	ReservationRequestValidator validator,
-	DocumentValidationService documentValidationService,
-	ReservationService reservationService,
-	ConcurrentDictionary<string, ReservationResponse> reservations) =>
+	ReservationService reservationService) =>
 {
 	var validationErrors = validator.Validate(request);
 	if (validationErrors.Count > 0)
@@ -117,18 +114,16 @@ app.MapPost("/hotels/reserve", Results<Created<ReservationResponse>, BadRequest<
 		return TypedResults.BadRequest(ApiValidationProblemResponse.From(validationErrors));
 	}
 
-	if (!documentValidationService.IsValidForDestination(request.Destination, request.DocumentType))
+	try
 	{
-		var errors = new[]
-		{
-			new ApiValidationError("documentType", documentValidationService.GetValidationMessage(request.Destination))
-		};
+		var reservation = reservationService.Reserve(request);
+		return TypedResults.Created($"/hotels/reservation/{reservation.Reference}", reservation);
+	}
+	catch (ReservationDocumentValidationException exception)
+	{
+		var errors = new[] { new ApiValidationError(exception.Field, exception.Message) };
 		return TypedResults.UnprocessableEntity(ApiValidationProblemResponse.From(errors));
 	}
-
-	var reservation = reservationService.Reserve(request);
-	reservations[reservation.Reference] = reservation;
-	return TypedResults.Created($"/hotels/reservation/{reservation.Reference}", reservation);
 })
 	.WithTags("Hotels")
 	.WithSummary("Reserve a selected hotel room")
@@ -141,9 +136,9 @@ app.MapPost("/hotels/reserve", Results<Created<ReservationResponse>, BadRequest<
 
 app.MapGet("/hotels/reservation/{reference}", Results<Ok<ReservationResponse>, NotFound> (
 	string reference,
-	ConcurrentDictionary<string, ReservationResponse> reservations) =>
+	ReservationService reservationService) =>
 {
-	return reservations.TryGetValue(reference, out var reservation)
+	return reservationService.FindByReference(reference) is { } reservation
 		? TypedResults.Ok(reservation)
 		: TypedResults.NotFound();
 })

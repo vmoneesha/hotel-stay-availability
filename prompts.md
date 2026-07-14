@@ -482,18 +482,302 @@ Apply the prioritized case-study improvement list:
 
 Purpose: convert review findings into implementation improvements by making provider normalization additive, moving request validation into injectable validators, adding continuous integration, expanding e2e coverage for invalid dates and document mismatch, and updating the AI prompt log.
 
+## Prompt 17: Comprehensive Recommendation Review and Implementation
+
+```text
+Continue working in the existing Hotel Stay Availability solution.
+
+The application is already complete and functional.
+
+Perform a comprehensive review of the entire repository and implement the following improvements without changing the existing business functionality or user experience.
+
+Do not regenerate existing features.
+
+Preserve all API contracts and Angular UI behavior.
+
+Only make the improvements listed below.
+
+------------------------------------------------------------
+Backend Improvements
+------------------------------------------------------------
+
+1. Remove Dead API Mapping Logic
+
+Review HotelApiService.search.
+
+The backend currently returns a plain array.
+
+Remove any unnecessary dual-shape response handling or dead code while keeping the implementation future-proof.
+
+------------------------------------------------------------
+
+2. Improve Architecture
+
+Review the current architecture.
+
+Where practical, improve the separation of concerns without introducing unnecessary complexity.
+
+If a lightweight Domain class library can be introduced without breaking the solution, migrate shared contracts and abstractions there.
+
+Otherwise, explain why the current structure is acceptable for the scope of this case study.
+
+------------------------------------------------------------
+
+3. Introduce Reservation Store Abstraction
+
+Replace direct ConcurrentDictionary usage with an abstraction.
+
+Create
+
+IReservationStore
+
+Implement
+
+InMemoryReservationStore
+
+Register it through Dependency Injection.
+
+Update ReservationService to depend only on the interface.
+
+------------------------------------------------------------
+
+4. Remove Duplicate Validation
+
+Review reservation validation.
+
+Ensure DocumentValidationService is executed only once.
+
+Validation should exist in the business layer rather than being duplicated inside Minimal API endpoints.
+
+Keep HTTP responses unchanged.
+
+------------------------------------------------------------
+
+5. Reservation Timestamp
+
+Review ReservationService.
+
+Do not hardcode timestamps.
+
+Use DateTimeOffset.UtcNow in production code.
+
+If deterministic timestamps are required for tests, inject an abstraction such as
+
+IClock
+
+or
+
+TimeProvider
+
+rather than hardcoding dates.
+
+------------------------------------------------------------
+
+6. Backend Integration Tests
+
+Generate WebApplicationFactory integration tests.
+
+Cover
+
+GET /hotels/search
+
+POST /hotels/reserve
+
+GET /hotels/reservation/{reference}
+
+Verify
+
+200
+
+400
+
+422
+
+Successful reservation
+
+Reservation retrieval
+
+Keep tests deterministic.
+
+------------------------------------------------------------
+Frontend Improvements
+------------------------------------------------------------
+
+1. Reservation Navigation
+
+Prevent direct navigation to the Reservation page without first selecting a hotel.
+
+If no hotel is selected,
+
+redirect users back to the Search page
+
+or display a friendly message.
+
+Implement using Angular Route Guards or existing routing best practices.
+
+------------------------------------------------------------
+
+2. Angular Consistency
+
+Review the Angular project.
+
+Use a consistent coding style.
+
+Where appropriate,
+
+replace constructor dependency injection with inject().
+
+Use Signals consistently where already adopted.
+
+Avoid mixing architectural styles unnecessarily.
+
+------------------------------------------------------------
+
+3. API Contract
+
+Review HotelApiService.
+
+Remove any dead response parsing logic.
+
+Align the Angular service exactly with the backend response contract.
+
+------------------------------------------------------------
+
+4. End-to-End Tests
+
+Generate Playwright end-to-end tests.
+
+Cover
+
+Search hotels
+
+Sort results
+
+Reserve hotel
+
+Domestic booking
+
+International booking
+
+Document validation
+
+Booking confirmation
+
+Verify responsive navigation.
+
+------------------------------------------------------------
+Documentation Improvements
+------------------------------------------------------------
+
+Update README.md.
+
+Add a quick reference table containing
+
+Domestic Destinations
+
+International Destinations
+
+Accepted Document Types
+
+Sample Reservation Payload
+
+Swagger URL
+
+Angular URL
+
+Run Commands
+
+Testing Commands
+
+Reviewer Notes
+
+------------------------------------------------------------
+Code Quality
+------------------------------------------------------------
+
+Review the entire repository.
+
+Improve
+
+SOLID
+
+Dependency Injection
+
+Naming
+
+Code duplication
+
+Comments
+
+Readability
+
+Maintainability
+
+Do not introduce unnecessary abstractions.
+
+Avoid overengineering.
+
+------------------------------------------------------------
+Validation
+------------------------------------------------------------
+
+After completing all improvements,
+
+verify
+
+- Solution builds successfully.
+- Angular builds successfully.
+- Backend tests pass.
+- Angular unit tests pass.
+- Integration tests pass.
+- Playwright tests pass.
+- No compile warnings.
+- No dead code.
+- No duplicated validation.
+
+------------------------------------------------------------
+Output
+------------------------------------------------------------
+
+Before modifying files,
+
+explain the proposed improvements.
+
+After implementation,
+
+summarize
+
+- Files modified
+- Architectural improvements
+- Tests added
+- Documentation updates
+- Any recommendations that were intentionally not implemented and the reasons why.
+```
+
+Purpose: verify external review findings against the actual repository, fix only confirmed gaps, preserve behavior and user experience, introduce project-level domain separation, remove dead API-client parsing, centralize reservation validation/storage, add route-guard protection, modernize Angular confirmation state, expand e2e coverage, update documentation, and validate the complete solution.
+
+## Workspace Context Hooks Used
+
+| Context Hook | Example Usage | Why It Helped |
+| --- | --- | --- |
+| `#file` | `#file:challenge-hotelstay.pdf` and targeted references to files such as `README.md`, `spec.md`, `Program.cs`, and Angular component files | Kept Copilot grounded in the case-study brief and the exact implementation surface being changed. |
+| `#codebase` | Repository-wide review prompts such as evaluating architecture, duplicate backend layers, validation coverage, provider extensibility, and final case-study readiness | Helped Copilot reason across backend, frontend, tests, prompt assets, and documentation instead of optimizing one file in isolation. |
+| `#selection` | Focused edits and review of selected files/sections, especially `prompts.md`, `reflection.md`, UI components, endpoint handlers, and validation snippets | Reduced prompt ambiguity and kept small refactors scoped to the active text or code region. |
+
+These context hooks were used deliberately so Agent Mode could combine the PDF requirements, current repository state, and selected implementation details while avoiding drift from earlier design decisions.
+
 
 ## Prompt Purposes
 
 | Prompt | Purpose | Result |
 | --- | --- | --- |
 | Documentation-only design phase | Define scope before code | README, spec, prompt log, reflection headings |
-| Full solution scaffold | Generate runnable solution | `HotelStay.sln`, `HotelStay.Api`, `HotelStay.Tests`, `hotelstay-ui` |
+| Full solution scaffold | Generate runnable solution | `HotelStay.sln`, `HotelStay.Api`, `HotelStay.Domain`, `HotelStay.Tests`, `hotelstay-ui` |
 | Repository-level Copilot instructions | Standardize future AI-assisted work | `.github/copilot-instructions.md` |
 | Reusable prompt engineering assets | Create lifecycle prompt files | `.prompts/*.prompt.md` |
-| Domain layer only | Add domain contracts without implementation logic | `HotelStay.Api/Domain` |
-| Provider layer only | Add deterministic domain providers without services/endpoints | `HotelStay.Api/Domain/Providers` |
-| Business services only | Add provider search, reservation, and document services without endpoints | `HotelStay.Api/Domain/Services` |
+| Domain layer only | Add domain contracts without implementation logic | `HotelStay.Domain/Domain` |
+| Provider layer only | Add deterministic domain providers without services/endpoints | `HotelStay.Domain/Domain/Providers` |
+| Business services only | Add provider search, reservation, and document services without endpoints | `HotelStay.Domain/Domain/Services` |
 | Minimal API endpoints only | Wire API routes with TypedResults and DI | `HotelStay.Api/Program.cs` |
 | Frontend implementation only | Build the Angular booking UI without backend changes | `hotelstay-ui/src/app` |
 | Date picker validation | Add reusable date-only picker validation to search | `SearchBarComponent` |
@@ -506,6 +790,8 @@ Purpose: convert review findings into implementation improvements by making prov
 | Runtime, test, and validation prompt files | Add reusable operational prompt assets | `.prompts/run-application.prompt.md`, `.prompts/run-tests.prompt.md`, `.prompts/validate-solution.prompt.md` |
 | Swagger/OpenAPI documentation | Add documented Swagger UI and OpenAPI metadata | `HotelStay.Api/Program.cs`, `HotelStay.Api/HotelStay.Api.csproj`, `HotelStay.Api/Properties/launchSettings.json` |
 | Case study hardening and review fixes | Address final architecture, CI, e2e, and prompt-log gaps | `IProviderRoomNormalizer`, validators, `.github/workflows/ci.yml`, Playwright negative paths, `prompts.md` |
+| Comprehensive recommendation review and implementation | Verify review findings and implement confirmed improvements without behavior or UX changes | `HotelStay.Domain`, `IReservationStore`, `ReservationService`, `HotelApiService`, route guard, Playwright flows, README quick reference |
+| Workspace context hooks | Use `#file`, `#codebase`, and `#selection` to scope Copilot context deliberately | PDF-grounded analysis, repository-wide review, focused file/selection edits |
 | Provider architecture requirements | Preserve extensibility | `IHotelProvider`, provider mappers, DI registration |
 | Validation and testing requirements | Encode expected behavior | xUnit tests for mapping, price, filtering, date, document, and reference rules |
 
@@ -534,3 +820,4 @@ Purpose: convert review findings into implementation improvements by making prov
 - Keep provider normalization additive through `IProviderRoomNormalizer` strategies; adding a provider should not require provider-specific mapping inside `HotelSearchService`.
 - Keep endpoint validators outside `Program.cs` so Minimal API handlers stay focused on routing, status codes, and delegation.
 - Keep CI aligned with local validation: backend tests, frontend build, Angular unit tests, and Playwright e2e.
+- Use `#file` for authoritative documents or implementation anchors, `#codebase` for cross-cutting reviews, and `#selection` for tightly scoped edits.

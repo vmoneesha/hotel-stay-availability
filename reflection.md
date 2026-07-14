@@ -34,6 +34,8 @@ The Playwright setup exposed a realistic integration issue: the test originally 
 
 GitHub Copilot Enterprise Agent Mode was useful for moving across backend, frontend, tests, and documentation without losing the case-study constraints. The best prompts were scoped by phase, such as documentation-only, domain-only, provider-only, endpoint-only, frontend-only, and test-only. Those constraints reduced accidental rewrites and made each validation step smaller.
 
+Workspace context hooks were important for keeping Copilot grounded. I used `#file` for authoritative anchors such as the case-study PDF and active project files, `#codebase` style repository review prompts for architecture and readiness checks, and `#selection` style scoped prompts when editing focused sections such as prompt history, reflection notes, endpoint handlers, and UI components.
+
 AI was most effective when paired with explicit human judgement:
 
 - I kept the application offline and deterministic even when production-style ideas such as persistence, auth, or external APIs could have appeared attractive.
